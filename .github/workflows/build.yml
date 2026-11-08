@@ -7,9 +7,12 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    name: Assemble Release APK
+    name: Assemble Release APK & Publish Release
     runs-on: ubuntu-latest
 
     steps:
@@ -37,3 +40,25 @@ jobs:
           name: NINMODS-Admin-Release.apk
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
+
+      - name: Create or Update GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "NINMODS Admin v1.0.0"
+          body: |
+            ### NINMODS Admin Android Console v1.0.0
+            Official dedicated Admin Android application for infrastructure operations, telemetry, user wallet control, license key generation, and deposit verification.
+
+            #### Capabilities:
+            - **Live Telemetry**: Real-time stats across users, balances, keys, and transaction queues.
+            - **License Key Management**: Instant HWID resets, time extension (+24h/+7d), ban/unban, and bulk key generation.
+            - **User Wallet & Roles**: Balance credit/deduct in USD, role promotion (`user`, `reseller`, `vip_reseller`).
+            - **Deposit Verification**: Pending transactions queue with payment proof review, 1-tap approve and reject.
+            - **Game Configurations**: Live engine toggle (Free Fire version, maintenance mode, ESP/Aimbot toggles).
+          draft: false
+          prerelease: false
+          files: app/build/outputs/apk/release/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
