@@ -118,13 +118,13 @@ fun AdminDepositsScreen(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
 
-                                    if (!item.transactionId.isNullOrBlank()) {
+                                    if (!item.trxId.isNullOrBlank()) {
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier.padding(top = 4.dp)
                                         ) {
                                             Text(
-                                                text = "TrxID: ${item.transactionId}",
+                                                text = "TrxID: ${item.trxId}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 fontFamily = FontFamily.Monospace,
                                                 color = MaterialTheme.colorScheme.primary
@@ -137,15 +137,15 @@ fun AdminDepositsScreen(
                                                 modifier = Modifier
                                                     .size(16.dp)
                                                     .clickable {
-                                                        clipboardManager.setText(AnnotatedString(item.transactionId))
+                                                        clipboardManager.setText(AnnotatedString(item.trxId))
                                                     }
                                             )
                                         }
                                     }
 
-                                    if (!item.senderNumber.isNullOrBlank()) {
+                                    if (!item.adminNotes.isNullOrBlank()) {
                                         Text(
-                                            text = "Sender: ${item.senderNumber}",
+                                            text = "Notes: ${item.adminNotes}",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -158,10 +158,10 @@ fun AdminDepositsScreen(
                                     )
                                 }
 
-                                if (!item.proofUrl.isNullOrBlank()) {
+                                if (!item.proofImage.isNullOrBlank()) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     AsyncImage(
-                                        model = item.proofUrl,
+                                        model = item.proofImage,
                                         contentDescription = "Payment Screenshot",
                                         modifier = Modifier
                                             .size(60.dp)

@@ -157,7 +157,7 @@ fun AdminDashboardScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "\$${String.format("%.2f", s.totalBalance)}",
+                        text = "\$${String.format("%.2f", s.totalUserBalance)}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = ColorWarning
@@ -264,7 +264,7 @@ fun AdminDashboardScreen(
                         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                         TelemetryRow("Banned / Locked Keys", "${s.bannedKeys}", ColorError)
                         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                        TelemetryRow("Active Game Targets", "${s.activeGames}", ColorInfo)
+                        TelemetryRow("Open Support Tickets", "${s.openTickets}", ColorInfo)
                     }
                 }
             }

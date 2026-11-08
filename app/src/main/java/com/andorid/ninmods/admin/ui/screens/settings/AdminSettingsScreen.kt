@@ -43,7 +43,7 @@ fun AdminSettingsScreen(
     ) {
         Spacer(modifier = Modifier.height(4.dp))
 
-        // 1. Game Engine Configurations Card
+        // 1. Target Game Engine Configurations Card
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
@@ -106,13 +106,13 @@ fun AdminSettingsScreen(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = cfg.gameName,
+                                                text = cfg.gameType.uppercase(),
                                                 style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
-                                                text = "Package: ${cfg.gamePackage} • Ver: ${cfg.latestVersion}",
+                                                text = "Package: ${cfg.gamePackage} • Ver: ${cfg.gameVersion}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -128,19 +128,19 @@ fun AdminSettingsScreen(
                                         icon = Icons.Filled.Visibility,
                                         title = "ESP Visuals",
                                         summary = "Inject floating skeletal/box overlays",
-                                        checked = cfg.espStatus,
+                                        checked = cfg.espEnabled,
                                         onCheckedChange = { isChecked ->
-                                            onUpdateGameConfig(cfg.id, cfg.status, cfg.latestVersion, isChecked, cfg.aimbotStatus, cfg.updateNotice ?: "")
+                                            onUpdateGameConfig(cfg.id, cfg.status, cfg.gameVersion, isChecked, cfg.aimbotEnabled, cfg.noticeMessage ?: "")
                                         }
                                     )
 
                                     SwitchItem(
                                         icon = Icons.Filled.GpsFixed,
                                         title = "Aim Engine",
-                                        summary = "Enable memory touch touch injection",
-                                        checked = cfg.aimbotStatus,
+                                        summary = "Enable memory touch injection",
+                                        checked = cfg.aimbotEnabled,
                                         onCheckedChange = { isChecked ->
-                                            onUpdateGameConfig(cfg.id, cfg.status, cfg.latestVersion, cfg.espStatus, isChecked, cfg.updateNotice ?: "")
+                                            onUpdateGameConfig(cfg.id, cfg.status, cfg.gameVersion, cfg.espEnabled, isChecked, cfg.noticeMessage ?: "")
                                         }
                                     )
 
@@ -151,14 +151,14 @@ fun AdminSettingsScreen(
                                         checked = cfg.status.equals("maintenance", ignoreCase = true),
                                         onCheckedChange = { isChecked ->
                                             val newStatus = if (isChecked) "maintenance" else "online"
-                                            onUpdateGameConfig(cfg.id, newStatus, cfg.latestVersion, cfg.espStatus, cfg.aimbotStatus, cfg.updateNotice ?: "")
+                                            onUpdateGameConfig(cfg.id, newStatus, cfg.gameVersion, cfg.espEnabled, cfg.aimbotEnabled, cfg.noticeMessage ?: "")
                                         }
                                     )
 
-                                    if (!cfg.updateNotice.isNullOrBlank()) {
+                                    if (!cfg.noticeMessage.isNullOrBlank()) {
                                         Spacer(modifier = Modifier.height(6.dp))
                                         Text(
-                                            text = "Notice: ${cfg.updateNotice}",
+                                            text = "Notice: ${cfg.noticeMessage}",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = ApatchOrange
                                         )
@@ -248,7 +248,7 @@ fun AdminSettingsScreen(
                                 ) {
                                     Column {
                                         Text(
-                                            text = plan.planName,
+                                            text = plan.title,
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.onSurface
@@ -261,7 +261,7 @@ fun AdminSettingsScreen(
                                     }
 
                                     Text(
-                                        text = "\$${String.format("%.2f", plan.priceUsd)}",
+                                        text = "\$${String.format("%.2f", plan.retailPrice)}",
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = ApatchGreen
@@ -341,15 +341,15 @@ fun AdminSettingsScreen(
 
     // Edit Game Config Dialog
     editingConfig?.let { cfg ->
-        var versionText by remember { mutableStateOf(cfg.latestVersion) }
-        var noticeText by remember { mutableStateOf(cfg.updateNotice ?: "") }
+        var versionText by remember(cfg) { mutableStateOf(cfg.gameVersion) }
+        var noticeText by remember(cfg) { mutableStateOf(cfg.noticeMessage ?: "") }
 
         AlertDialog(
             onDismissRequest = { editingConfig = null },
             shape = RoundedCornerShape(20.dp),
             title = {
                 Text(
-                    text = "Edit Game Config: ${cfg.gameName}",
+                    text = "Edit Config: ${cfg.gameType.uppercase()}",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -377,7 +377,7 @@ fun AdminSettingsScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        onUpdateGameConfig(cfg.id, cfg.status, versionText, cfg.espStatus, cfg.aimbotStatus, noticeText)
+                        onUpdateGameConfig(cfg.id, cfg.status, versionText, cfg.espEnabled, cfg.aimbotEnabled, noticeText)
                         editingConfig = null
                     },
                     shape = RoundedCornerShape(12.dp),
