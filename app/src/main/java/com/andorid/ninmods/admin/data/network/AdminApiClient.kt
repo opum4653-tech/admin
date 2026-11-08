@@ -461,4 +461,231 @@ object AdminApiClient {
             Result.failure(e)
         }
     }
+
+    suspend fun executeUserAction(apiKey: String, userId: Int, action: String, reason: String = ""): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/users/$userId/action", "POST", apiKey)
+            val payload = JSONObject().apply {
+                put("action", action)
+                put("reason", reason)
+            }
+            sendJson(conn, payload.toString())
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
+                Result.success(json.optString("message", "User action completed"))
+            } else {
+                Result.failure(Exception(json.optString("error", "User action failed")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getAllDeposits(apiKey: String, status: String? = null): Result<List<PendingDepositItem>> = withContext(Dispatchers.IO) {
+        try {
+            val q = if (!status.isNullOrBlank() && status != "ALL") "?status=${URLEncoder.encode(status.lowercase(), "UTF-8")}" else ""
+            val conn = openConnection("/deposits/all$q", "GET", apiKey)
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
+                val array = json.optJSONArray("deposits") ?: JSONArray()
+                val list = mutableListOf<PendingDepositItem>()
+                for (i in 0 until array.length()) {
+                    val item = array.getJSONObject(i)
+                    list.add(
+                        PendingDepositItem(
+                            id = item.optInt("id"),
+                            userId = item.optInt("user_id"),
+                            username = item.optString("username"),
+                            email = item.optString("email"),
+                            amount = item.optDouble("amount", 0.0),
+                            currency = item.optString("currency", "BDT"),
+                            paymentMethod = item.optString("payment_method", "manual"),
+                            trxId = item.optString("trx_id"),
+                            proofImage = item.optString("proof_image").takeIf { it.isNotBlank() && it != "null" },
+                            status = item.optString("status", "pending"),
+                            adminNotes = item.optString("admin_notes").takeIf { it.isNotBlank() && it != "null" },
+                            createdAt = item.optString("created_at")
+                        )
+                    )
+                }
+                Result.success(list)
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to load deposits")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun addManualDeposit(
+        apiKey: String,
+        userId: Int,
+        amount: Double,
+        paymentMethod: String = "manual_admin",
+        notes: String = ""
+    ): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/deposits/manual", "POST", apiKey)
+            val payload = JSONObject().apply {
+                put("user_id", userId)
+                put("amount", amount)
+                put("payment_method", paymentMethod)
+                put("notes", notes)
+            }
+            sendJson(conn, payload.toString())
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode in 200..201 && json.optBoolean("success", true)) {
+                Result.success(json.optString("message", "Manual deposit credited successfully"))
+            } else {
+                Result.failure(Exception(json.optString("error", "Manual deposit failed")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getSupportTickets(apiKey: String, status: String? = null): Result<List<AdminTicketItem>> = withContext(Dispatchers.IO) {
+        try {
+            val q = if (!status.isNullOrBlank() && status != "ALL") "?status=${URLEncoder.encode(status.lowercase(), "UTF-8")}" else ""
+            val conn = openConnection("/support/tickets$q", "GET", apiKey)
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
+                val array = json.optJSONArray("tickets") ?: JSONArray()
+                val list = mutableListOf<AdminTicketItem>()
+                for (i in 0 until array.length()) {
+                    val item = array.getJSONObject(i)
+                    list.add(
+                        AdminTicketItem(
+                            id = item.optInt("id"),
+                            userId = item.optInt("user_id"),
+                            username = item.optString("username"),
+                            email = item.optString("email"),
+                            subject = item.optString("subject"),
+                            department = item.optString("category", item.optString("department", "general")),
+                            status = item.optString("status", "open"),
+                            priority = item.optString("priority", "medium"),
+                            lastReplyAt = item.optString("last_updated").takeIf { it.isNotBlank() && it != "null" } ?: item.optString("last_reply_at").takeIf { it.isNotBlank() && it != "null" },
+                            createdAt = item.optString("created_at")
+                        )
+                    )
+                }
+                Result.success(list)
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to load tickets")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getTicketReplies(apiKey: String, ticketId: Int): Result<List<AdminTicketReplyItem>> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/support/tickets/$ticketId", "GET", apiKey)
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
+                val array = json.optJSONArray("replies") ?: JSONArray()
+                val list = mutableListOf<AdminTicketReplyItem>()
+                for (i in 0 until array.length()) {
+                    val item = array.getJSONObject(i)
+                    list.add(
+                        AdminTicketReplyItem(
+                            id = item.optInt("id"),
+                            ticketId = item.optInt("ticket_id"),
+                            userId = item.optInt("user_id").takeIf { it > 0 },
+                            adminId = item.optInt("admin_id").takeIf { it > 0 },
+                            userName = item.optString("sender_name", item.optString("user_name")),
+                            adminName = item.optString("admin_name").takeIf { it.isNotBlank() && it != "null" },
+                            message = item.optString("message"),
+                            attachmentUrl = item.optString("attachment_url").takeIf { it.isNotBlank() && it != "null" },
+                            createdAt = item.optString("created_at")
+                        )
+                    )
+                }
+                Result.success(list)
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to load replies")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun replyTicket(apiKey: String, ticketId: Int, message: String, status: String? = null): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/support/tickets/$ticketId/reply", "POST", apiKey)
+            val payload = JSONObject().apply {
+                put("message", message)
+                if (!status.isNullOrBlank()) put("status", status)
+            }
+            sendJson(conn, payload.toString())
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode in 200..201 && json.optBoolean("success", true)) {
+                Result.success(json.optString("message", "Reply submitted"))
+            } else {
+                Result.failure(Exception(json.optString("error", "Reply failed")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateTicketStatus(apiKey: String, ticketId: Int, status: String): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/support/tickets/$ticketId/status", "POST", apiKey)
+            val payload = JSONObject().apply {
+                put("status", status)
+            }
+            sendJson(conn, payload.toString())
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
+                Result.success(json.optString("message", "Status updated"))
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to update status")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun uploadModZip(
+        apiKey: String,
+        modType: String,
+        fileName: String,
+        base64Data: String
+    ): Result<ModUploadResult> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/mods/upload", "POST", apiKey)
+            val payload = JSONObject().apply {
+                put("mod_type", modType)
+                put("file_name", fileName)
+                put("file_base64", base64Data)
+            }
+            sendJson(conn, payload.toString())
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
+                Result.success(
+                    ModUploadResult(
+                        success = true,
+                        message = json.optString("message", "Mod uploaded successfully"),
+                        modType = json.optString("mod_type", modType),
+                        targetFile = json.optString("target_file", fileName),
+                        fileSizeBytes = json.optLong("file_size", 0L),
+                        verifiedEntriesCount = json.optInt("verified_entries_count", 1)
+                    )
+                )
+            } else {
+                Result.failure(Exception(json.optString("error", "Mod upload failed")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

@@ -48,6 +48,8 @@ fun AdminManagementScreen(
     onChangeRole: (userId: Int, newRole: String) -> Unit,
     onApproveDeposit: (depositId: Int, amount: Double?) -> Unit,
     onRejectDeposit: (depositId: Int, reason: String) -> Unit,
+    onUserAction: (userId: Int, action: String, reason: String) -> Unit = { _, _, _ -> },
+    onAddManualDeposit: (userId: Int, amount: Double, method: String, notes: String) -> Unit = { _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -136,6 +138,7 @@ fun AdminManagementScreen(
                     users = users,
                     isLoading = isLoading,
                     onRefresh = onRefresh,
+                    onUserAction = onUserAction,
                     onUpdateBalance = onUpdateBalance,
                     onChangeRole = onChangeRole
                 )
@@ -144,7 +147,8 @@ fun AdminManagementScreen(
                     isLoading = isLoading,
                     onRefresh = onRefresh,
                     onApprove = onApproveDeposit,
-                    onReject = onRejectDeposit
+                    onReject = onRejectDeposit,
+                    onAddManualDeposit = onAddManualDeposit
                 )
             }
         }

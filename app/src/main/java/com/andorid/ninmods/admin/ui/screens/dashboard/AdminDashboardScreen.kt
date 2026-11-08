@@ -6,17 +6,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.andorid.ninmods.admin.R
 import com.andorid.ninmods.admin.data.model.DashboardStats
 
@@ -29,7 +30,7 @@ private val ColorInfo = Color(0xFF9ECAFF)
 fun AdminDashboardScreen(
     stats: DashboardStats?,
     isLoading: Boolean,
-    onNavigateToManagement: (initialSubTab: Int) -> Unit,
+    onNavigateToPage: (pageIndex: Int) -> Unit,
     onOpenBulkGenerate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -40,237 +41,111 @@ fun AdminDashboardScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Spacer(modifier = Modifier.height(4.dp))
 
-        // 1. APatch Side-by-Side Status Cards: Row 1 (Active Keys & Registered Users)
+        // SECTION 1: PRIMARY TELEMETRY (Standardized Uniform Cards - Row 1)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Card 1: Active Keys
-            ElevatedCard(
+            StandardMetricCard(
+                title = "Active Keys",
+                value = "${s.activeKeys}",
+                statusText = "In Production",
+                icon = Icons.Filled.CheckCircle,
+                iconColor = ColorSuccess,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { onNavigateToManagement(0) },
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 18.dp, horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = "Active Keys",
-                        tint = ColorSuccess,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "${s.activeKeys}",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = ColorSuccess
-                    )
-                    Text(
-                        text = "Active Keys",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+                    .clickable { onNavigateToPage(2) } // Keys page
+            )
 
-            // Card 2: Registered Users
-            ElevatedCard(
+            StandardMetricCard(
+                title = "Total Users",
+                value = "${s.totalUsers}",
+                statusText = "Accounts in DB",
+                icon = Icons.Filled.People,
+                iconColor = ColorInfo,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { onNavigateToManagement(1) },
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 18.dp, horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_user_profile),
-                        contentDescription = "Users",
-                        tint = ColorInfo,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "${s.totalUsers}",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = ColorInfo
-                    )
-                    Text(
-                        text = "Users in DB",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+                    .clickable { onNavigateToPage(1) } // Users page
+            )
         }
 
-        // 2. APatch Side-by-Side Status Cards: Row 2 (Total Balance & Pending Deposits)
+        // SECTION 2: PRIMARY TELEMETRY (Standardized Uniform Cards - Row 2)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Card 3: Total Balance
-            ElevatedCard(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 18.dp, horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.AccountBalanceWallet,
-                        contentDescription = "Balance",
-                        tint = ColorWarning,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "\$${String.format("%.2f", s.totalUserBalance)}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = ColorWarning
-                    )
-                    Text(
-                        text = "Total Balance",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            StandardMetricCard(
+                title = "User Wallets",
+                value = "\$${String.format("%.2f", s.totalUserBalance)}",
+                statusText = "Total Balance",
+                icon = Icons.Filled.AccountBalanceWallet,
+                iconColor = ColorWarning,
+                modifier = Modifier.weight(1f)
+            )
 
-            // Card 4: Pending Deposits Queue
-            ElevatedCard(
+            StandardMetricCard(
+                title = "Deposits Queue",
+                value = "${s.pendingDeposits}",
+                statusText = if (s.pendingDeposits > 0) "Awaiting Review" else "Queue Clear",
+                icon = if (s.pendingDeposits > 0) Icons.Filled.PendingActions else Icons.Filled.Verified,
+                iconColor = if (s.pendingDeposits > 0) ColorError else ColorSuccess,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { onNavigateToManagement(2) },
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 18.dp, horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = if (s.pendingDeposits > 0) Icons.Filled.PendingActions else Icons.Filled.Verified,
-                        contentDescription = "Pending Deposits",
-                        tint = if (s.pendingDeposits > 0) ColorError else ColorSuccess,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "${s.pendingDeposits}",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (s.pendingDeposits > 0) ColorError else ColorSuccess
-                    )
-                    Text(
-                        text = if (s.pendingDeposits > 0) "Pending Deposits" else "Deposits Clear",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+                    .clickable { onNavigateToPage(4) } // Deposits page
+            )
         }
 
-        // 3. APatch Elevated Telemetry Breakdown Card
-        ElevatedCard(
+        // SECTION 3: SECONDARY METRICS (Standardized Uniform Cards - Row 3)
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Analytics,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "INFRASTRUCTURE TELEMETRY",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+            StandardCompactMetricCard(
+                title = "Unused Stock",
+                value = "${s.unusedKeys}",
+                icon = Icons.Filled.VpnKey,
+                iconColor = ColorSuccess,
+                modifier = Modifier.weight(1f)
+            )
 
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        TelemetryRow("Total Keys in DB", "${s.totalKeys}", MaterialTheme.colorScheme.onSurface)
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                        TelemetryRow("Unused Available Stock", "${s.unusedKeys}", ColorSuccess)
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                        TelemetryRow("Expired Keys", "${s.expiredKeys}", ColorWarning)
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                        TelemetryRow("Banned / Locked Keys", "${s.bannedKeys}", ColorError)
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                        TelemetryRow("Open Support Tickets", "${s.openTickets}", ColorInfo)
-                    }
-                }
-            }
+            StandardCompactMetricCard(
+                title = "Expired Keys",
+                value = "${s.expiredKeys}",
+                icon = Icons.Filled.History,
+                iconColor = ColorWarning,
+                modifier = Modifier.weight(1f)
+            )
         }
 
-        // 4. Quick Action APatch Buttons
+        // SECTION 4: SECONDARY METRICS (Standardized Uniform Cards - Row 4)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StandardCompactMetricCard(
+                title = "Banned Keys",
+                value = "${s.bannedKeys}",
+                icon = Icons.Filled.Block,
+                iconColor = ColorError,
+                modifier = Modifier.weight(1f)
+            )
+
+            StandardCompactMetricCard(
+                title = "Open Tickets",
+                value = "${s.openTickets}",
+                icon = Icons.Filled.QuestionAnswer,
+                iconColor = ColorInfo,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onNavigateToPage(3) } // Support page
+            )
+        }
+
+        // SECTION 5: QUICK ACTIONS (Standardized Action Buttons)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -299,7 +174,7 @@ fun AdminDashboardScreen(
             }
 
             Button(
-                onClick = { onNavigateToManagement(2) },
+                onClick = { onNavigateToPage(4) }, // Deposits
                 modifier = Modifier
                     .weight(1f)
                     .height(52.dp),
@@ -310,7 +185,7 @@ fun AdminDashboardScreen(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Filled.ReceiptLong,
+                    imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )
@@ -327,27 +202,126 @@ fun AdminDashboardScreen(
     }
 }
 
+/**
+ * Standardized Telemetry Card with strict equal height and symmetrical content alignment.
+ */
 @Composable
-private fun TelemetryRow(
-    label: String,
+private fun StandardMetricCard(
+    title: String,
     value: String,
-    valueColor: Color
+    statusText: String,
+    icon: ImageVector,
+    iconColor: Color,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(130.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = valueColor
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 14.dp, horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = iconColor,
+                modifier = Modifier.size(28.dp)
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = iconColor,
+                maxLines = 1
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
+            )
+            Text(
+                text = statusText,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/**
+ * Standardized Compact Metric Card with strict equal height for secondary metrics.
+ */
+@Composable
+private fun StandardCompactMetricCard(
+    title: String,
+    value: String,
+    icon: ImageVector,
+    iconColor: Color,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(96.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = iconColor
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = iconColor.copy(alpha = 0.15f),
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = title,
+                        tint = iconColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+        }
     }
 }

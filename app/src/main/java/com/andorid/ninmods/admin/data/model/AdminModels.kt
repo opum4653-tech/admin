@@ -96,3 +96,37 @@ data class SubscriptionPlanItem(
     val status: String,
     val sortOrder: Int
 )
+
+data class AdminTicketItem(
+    val id: Int,
+    val userId: Int,
+    val username: String,
+    val email: String,
+    val subject: String,
+    val department: String,
+    val status: String,
+    val priority: String,
+    val lastReplyAt: String?,
+    val createdAt: String
+)
+
+data class AdminTicketReplyItem(
+    val id: Int,
+    val ticketId: Int,
+    val userId: Int?,
+    val adminId: Int?,
+    val userName: String?,
+    val adminName: String?,
+    val message: String,
+    val attachmentUrl: String?,
+    val createdAt: String
+)
+
+data class ModUploadResult(
+    val success: Boolean,
+    val message: String,
+    val modType: String,
+    val targetFile: String,
+    val fileSizeBytes: Long,
+    val verifiedEntriesCount: Int
+)

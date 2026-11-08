@@ -22,10 +22,13 @@ val ApatchOrange = Color(0xFFFFB74D)
 
 enum class AdminTab {
     DASHBOARD,
-    KEYS,
     USERS,
+    KEYS,
+    SUPPORT,
     DEPOSITS,
-    SETTINGS
+    UPLOAD,
+    SETTINGS,
+    PROFILE
 }
 
 @Composable

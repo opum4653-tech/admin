@@ -47,18 +47,22 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.1
-          name: "NINMODS Admin v1.0.1 (Official APatch UI)"
+          tag_name: v1.0.2
+          name: "NINMODS Admin v1.0.2 (APatch Navigation Drawer & Full Suite Overhaul)"
           body: |
-            ### NINMODS Admin Android Console v1.0.1
-            Official dedicated Admin Android application rebuilt with 100% 1:1 replica of the official APatch / DriverLoader design system and navigation architecture.
+            ### NINMODS Admin Android Console v1.0.2
+            Major overhaul according to official APatch / DriverLoader specifications:
 
-            #### APatch UI Features:
-            - **APatch TopAppBar**: Header with title, live refresh action, and top-right profile icon (`ic_user_profile`) linking to Admin Profile subpage.
-            - **APatch BottomNavigationBar**: Rounded pill surface (`RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)`) with official drawables (`ic_nav_home_fill` / `ic_nav_home`, `ic_nav_wrench`, `ic_nav_gear`).
-            - **APatch Screen Transitions**: 340ms horizontal slide + fade in/out for Profile and 340ms crossfade between tabs.
-            - **Elevated Status Cards**: 20.dp rounded elevated cards, side-by-side metric badges (Active Keys, Users in DB, Total Balance, Deposits Queue), and `SwitchItem` configuration controls.
-            - **Management Suite**: Clean sub-tab pills for License Keys (with HWID reset, time extensions, ban/unban), User Accounts (credit/deduct, role promotion), and Pending Deposits.
+            #### New Architecture & Features:
+            - **1:1 Loader Login Replica**: Exact visual parity with `DriverLoader` (surface with `logo_n`, `RoundedCornerShape(22.dp)`, custom `TextField` styling with `surfaceVariant`, error container, 52.dp sign-in button).
+            - **Standardized Dashboard Cards**: Uniform equal-height metric cards (`130.dp` primary, `96.dp` secondary) eliminating irregular layout dimensions. Documented in `docs/DASHBOARD_METRICS.md`.
+            - **Bottom Navigation Completely Removed**: Replaced with APatch top hamburger menu button (`Icons.Filled.Menu`).
+            - **Modal Navigation Drawer (Sidebar)**: APatch official drawer with quick navigation to all 8 operational suites.
+            - **Users Suite with 3-Dots Action Dropdown**: Ban / Unban accounts, Reset HWID, Adjust wallet balances, Change role permissions, and view complete user profiles.
+            - **License Keys Suite**: Bulk key generator, status filtering (Active, Unused, Expired, Banned), HWID resets, and time extensions.
+            - **Support Live Messaging Suite**: Full customer support ticket thread viewer with bubble chat and admin reply composer.
+            - **Deposits Suite**: Status filtering (Pending, Approved, Rejected, All), proof screenshot previewer, 1-tap Approve/Reject, and Manual Deposit credit modal.
+            - **Anti-Shell Mod Upload**: Client & server-side inspection rejecting `.sh`, `.php`, `.py`, `.exe`, etc., zip entry traversal check, PK signature validation, directly updating `downloads/external/gemini-cli.zip` and `downloads/kernel/ninmods-kernel.zip`.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk

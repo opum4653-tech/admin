@@ -41,6 +41,12 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
     private val _pendingDeposits = MutableStateFlow<List<PendingDepositItem>>(emptyList())
     val pendingDeposits: StateFlow<List<PendingDepositItem>> = _pendingDeposits.asStateFlow()
 
+    private val _allDeposits = MutableStateFlow<List<PendingDepositItem>>(emptyList())
+    val allDeposits: StateFlow<List<PendingDepositItem>> = _allDeposits.asStateFlow()
+
+    private val _ticketsList = MutableStateFlow<List<AdminTicketItem>>(emptyList())
+    val ticketsList: StateFlow<List<AdminTicketItem>> = _ticketsList.asStateFlow()
+
     private val _gameConfigs = MutableStateFlow<List<GameConfigItem>>(emptyList())
     val gameConfigs: StateFlow<List<GameConfigItem>> = _gameConfigs.asStateFlow()
 
@@ -86,6 +92,8 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
         _keysList.value = emptyList()
         _usersList.value = emptyList()
         _pendingDeposits.value = emptyList()
+        _allDeposits.value = emptyList()
+        _ticketsList.value = emptyList()
         _gameConfigs.value = emptyList()
         _plans.value = emptyList()
     }
@@ -111,20 +119,111 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
             }
             // 4. Deposits
             launch {
-                val r = AdminApiClient.getPendingDeposits(key)
-                if (r.isSuccess) _pendingDeposits.value = r.getOrNull() ?: emptyList()
+                val r = AdminApiClient.getAllDeposits(key)
+                if (r.isSuccess) {
+                    val list = r.getOrNull() ?: emptyList()
+                    _allDeposits.value = list
+                    _pendingDeposits.value = list.filter { it.status.equals("pending", ignoreCase = true) }
+                }
             }
-            // 5. Game Configs
+            // 5. Tickets
+            launch {
+                val r = AdminApiClient.getSupportTickets(key)
+                if (r.isSuccess) _ticketsList.value = r.getOrNull() ?: emptyList()
+            }
+            // 6. Game Configs
             launch {
                 val r = AdminApiClient.getGameConfigs(key)
                 if (r.isSuccess) _gameConfigs.value = r.getOrNull() ?: emptyList()
             }
-            // 6. Plans
+            // 7. Plans
             launch {
                 val r = AdminApiClient.getAdminPlans(key)
                 if (r.isSuccess) _plans.value = r.getOrNull() ?: emptyList()
             }
             _isLoading.value = false
+        }
+    }
+
+    fun executeUserAction(userId: Int, action: String, reason: String) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            val r = AdminApiClient.executeUserAction(key, userId, action, reason)
+            if (r.isSuccess) {
+                val usersRes = AdminApiClient.getUsers(key)
+                if (usersRes.isSuccess) _usersList.value = usersRes.getOrNull() ?: emptyList()
+                val keysRes = AdminApiClient.getKeys(key)
+                if (keysRes.isSuccess) _keysList.value = keysRes.getOrNull() ?: emptyList()
+                val dashRes = AdminApiClient.getDashboard(key)
+                if (dashRes.isSuccess) _dashboardStats.value = dashRes.getOrNull()
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun addManualDeposit(userId: Int, amount: Double, method: String, notes: String) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            val r = AdminApiClient.addManualDeposit(key, userId, amount, method, notes)
+            if (r.isSuccess) {
+                val depRes = AdminApiClient.getAllDeposits(key)
+                if (depRes.isSuccess) {
+                    val list = depRes.getOrNull() ?: emptyList()
+                    _allDeposits.value = list
+                    _pendingDeposits.value = list.filter { it.status.equals("pending", ignoreCase = true) }
+                }
+                val usersRes = AdminApiClient.getUsers(key)
+                if (usersRes.isSuccess) _usersList.value = usersRes.getOrNull() ?: emptyList()
+                val dashRes = AdminApiClient.getDashboard(key)
+                if (dashRes.isSuccess) _dashboardStats.value = dashRes.getOrNull()
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun loadTicketReplies(ticketId: Int, onResult: (List<AdminTicketReplyItem>) -> Unit) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            val r = AdminApiClient.getTicketReplies(key, ticketId)
+            onResult(r.getOrNull() ?: emptyList())
+        }
+    }
+
+    fun replyTicket(ticketId: Int, message: String, onComplete: () -> Unit) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            val r = AdminApiClient.replyTicket(key, ticketId, message)
+            if (r.isSuccess) {
+                val ticketsRes = AdminApiClient.getSupportTickets(key)
+                if (ticketsRes.isSuccess) _ticketsList.value = ticketsRes.getOrNull() ?: emptyList()
+                onComplete()
+            }
+        }
+    }
+
+    fun updateTicketStatus(ticketId: Int, status: String) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            val r = AdminApiClient.updateTicketStatus(key, ticketId, status)
+            if (r.isSuccess) {
+                val ticketsRes = AdminApiClient.getSupportTickets(key)
+                if (ticketsRes.isSuccess) _ticketsList.value = ticketsRes.getOrNull() ?: emptyList()
+            }
+        }
+    }
+
+    fun uploadModZip(
+        modType: String,
+        fileName: String,
+        base64Data: String,
+        onResult: (Result<ModUploadResult>) -> Unit
+    ) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            val r = AdminApiClient.uploadModZip(key, modType, fileName, base64Data)
+            onResult(r)
         }
     }
 
