@@ -419,7 +419,9 @@ fun AdminGenerateKeyScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     val gameOptions = listOf(
@@ -432,9 +434,8 @@ fun AdminGenerateKeyScreen(
                         FilterChip(
                             selected = isSelected,
                             onClick = { selectedGameType = type },
-                            label = { Text(label) },
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f)
+                            label = { Text(label, maxLines = 1) },
+                            shape = RoundedCornerShape(12.dp)
                         )
                     }
                 }
@@ -446,7 +447,9 @@ fun AdminGenerateKeyScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     listOf(1, 2, 3).forEach { count ->
@@ -454,9 +457,8 @@ fun AdminGenerateKeyScreen(
                         FilterChip(
                             selected = isSelected,
                             onClick = { maxDevices = count },
-                            label = { Text("$count Device${if (count > 1) "s" else ""}") },
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f)
+                            label = { Text("$count Device${if (count > 1) "s" else ""}", maxLines = 1) },
+                            shape = RoundedCornerShape(12.dp)
                         )
                     }
                 }

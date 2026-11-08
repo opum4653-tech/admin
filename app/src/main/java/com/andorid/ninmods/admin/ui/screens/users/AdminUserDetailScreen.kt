@@ -1,6 +1,7 @@
 package com.andorid.ninmods.admin.ui.screens.users
 
 import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -280,7 +281,9 @@ fun AdminUserDetailScreen(
 
                     val roles = listOf("user", "reseller", "vip_reseller")
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         roles.forEach { roleKey ->
@@ -292,9 +295,8 @@ fun AdminUserDetailScreen(
                                     onChangeRole(user.id, roleKey)
                                     Toast.makeText(context, "Role updated to $roleKey", Toast.LENGTH_SHORT).show()
                                 },
-                                label = { Text(roleKey.uppercase()) },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
+                                label = { Text(roleKey.uppercase(), maxLines = 1) },
+                                shape = RoundedCornerShape(12.dp)
                             )
                         }
                     }

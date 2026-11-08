@@ -66,8 +66,8 @@ enum class AdminDestination(
     SUPPORT("Support", "Live Tickets & Threads", Icons.Filled.SupportAgent),
     TICKET_CHAT("Ticket Thread", "Live Conversation", Icons.AutoMirrored.Filled.Chat, false),
     DEPOSITS("Deposits", "Review & Manual Credit", Icons.Filled.AccountBalanceWallet),
-    UPLOAD("Mod Deployment", "Package Upload", Icons.Filled.CloudUpload),
-    BROADCAST("Push Popups & Alerts", "In-App Dialog & Image Banner", Icons.Filled.Campaign),
+    UPLOAD("Mod Deploy", "Package Upload", Icons.Filled.CloudUpload),
+    BROADCAST("Push Alerts", "In-App Dialog & Image Banner", Icons.Filled.Campaign),
     SETTINGS("Game Configurations", "Engine Toggles & Pricing", Icons.Filled.Tune),
     PROFILE("Admin Profile", "Security & Session", Icons.Filled.AccountCircle)
 }

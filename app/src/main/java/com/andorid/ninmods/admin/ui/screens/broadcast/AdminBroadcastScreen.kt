@@ -144,23 +144,42 @@ fun AdminBroadcastScreen(
 
                     Text(text = "Priority Level:", style = MaterialTheme.typography.bodyMedium)
 
-                    val types = listOf(
-                        Pair("info", "Information"),
-                        Pair("warning", "Warning"),
-                        Pair("urgent", "Urgent Alert"),
-                        Pair("update", "App Update")
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        types.forEach { (typeKey, label) ->
-                            val isSelected = selectedType == typeKey
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             FilterChip(
-                                selected = isSelected,
-                                onClick = { selectedType = typeKey },
-                                label = { Text(label) },
+                                selected = selectedType == "info",
+                                onClick = { selectedType = "info" },
+                                label = { Text("Information", maxLines = 1) },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1f)
+                            )
+                            FilterChip(
+                                selected = selectedType == "warning",
+                                onClick = { selectedType = "warning" },
+                                label = { Text("Warning", maxLines = 1) },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            FilterChip(
+                                selected = selectedType == "urgent",
+                                onClick = { selectedType = "urgent" },
+                                label = { Text("Urgent Alert", maxLines = 1) },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1f)
+                            )
+                            FilterChip(
+                                selected = selectedType == "update",
+                                onClick = { selectedType = "update" },
+                                label = { Text("App Update", maxLines = 1) },
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.weight(1f)
                             )

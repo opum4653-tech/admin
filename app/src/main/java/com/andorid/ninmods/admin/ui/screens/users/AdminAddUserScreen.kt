@@ -1,6 +1,7 @@
 package com.andorid.ninmods.admin.ui.screens.users
 
 import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -191,7 +192,9 @@ fun AdminAddUserScreen(
                 )
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     roles.forEach { (roleKey, label) ->
@@ -199,9 +202,8 @@ fun AdminAddUserScreen(
                         FilterChip(
                             selected = isSelected,
                             onClick = { selectedRole = roleKey },
-                            label = { Text(label) },
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f)
+                            label = { Text(label, maxLines = 1) },
+                            shape = RoundedCornerShape(12.dp)
                         )
                     }
                 }

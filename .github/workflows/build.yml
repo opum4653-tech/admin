@@ -47,23 +47,17 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.5
-          name: "NINMODS Admin v1.0.5 (Responsive Architecture & Dedicated Pages)"
+          tag_name: v1.0.6
+          name: "NINMODS Admin v1.0.6 (Zero Text-Wrapping & Chip Grid Alignment)"
           body: |
-            ### NINMODS Admin Android Console v1.0.5
-            Comprehensive layout flexibility and dedicated screen workflow overhaul:
+            ### NINMODS Admin Android Console v1.0.6
+            Critical UI alignment & responsive layout perfection:
 
-            #### Key Updates in v1.0.5:
-            - **100% Flexible & Responsive UI (`ResponsiveContentBox`)**: Standardized adaptive max-width container ensuring layouts never stretch awkwardly or break on tablets, foldables, or small phones.
-            - **Dedicated Workflow Pages (Zero Awkward Bottom Sheets for Complex Flows)**:
-              - `AdminGenerateKeyScreen`: Full dedicated page for license key generation with searchable user binding.
-              - `AdminAddUserScreen`: Dedicated page to create new user accounts.
-              - `AdminUserDetailScreen`: Dedicated full inspector page for user profile, balance adjustment (credit/debit), role modification, and ban moderation.
-              - `AdminTicketChatScreen`: Dedicated ticket messaging thread with bubble history, user/admin chat, and status actions.
-              - `AdminBroadcastScreen`: Full dedicated screen for pushing in-app modal popups, banners, and update notices.
-            - **Single TopBar Title**: Minimal clean title beside drawer hamburger menu.
-            - **All 8 Dashboard Cards Standardized**: Symmetrical `UniformMetricCard`s (112.dp height, zero font clipping).
-            - **Branding & Privacy Sanitization**: Completely scrubbed APatch mentions, raw domain URLs, and server disk paths.
+            #### Key Updates in v1.0.6:
+            - **Fixed Chip Word-Wrapping**: Eliminated awkward broken multi-line words ("Inform ation", "Warnin g", "App Updat e") by upgrading priority and role selectors to a symmetrical 2x2 grid and horizontal-scroll containers.
+            - **TopBar Title Anti-Clipping**: Shortened top bar titles (e.g. "Push Alerts") ensuring clean rendering without ellipsis truncation beside action icons.
+            - **Anti-Overflow Adaptive Layout**: Guaranteed single-line chip labels with natural padding across small phones and large tablets alike.
+            - **100% Dedicated Workflows**: Maintained full-screen pages for Key Generation, User Details, Account Creation, Ticket Chat, and Broadcast Alerts.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk
