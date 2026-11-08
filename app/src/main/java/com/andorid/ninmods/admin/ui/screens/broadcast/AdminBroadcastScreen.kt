@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.andorid.ninmods.admin.data.model.AdminUserItem
+import com.andorid.ninmods.admin.ui.components.AdminFilterChipRow
 import com.andorid.ninmods.admin.ui.components.LoadingButton
 import com.andorid.ninmods.admin.ui.components.ResponsiveContentBox
 
@@ -144,47 +145,21 @@ fun AdminBroadcastScreen(
 
                     Text(text = "Priority Level:", style = MaterialTheme.typography.bodyMedium)
 
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            FilterChip(
-                                selected = selectedType == "info",
-                                onClick = { selectedType = "info" },
-                                label = { Text("Information", maxLines = 1) },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
-                            )
-                            FilterChip(
-                                selected = selectedType == "warning",
-                                onClick = { selectedType = "warning" },
-                                label = { Text("Warning", maxLines = 1) },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            FilterChip(
-                                selected = selectedType == "urgent",
-                                onClick = { selectedType = "urgent" },
-                                label = { Text("Urgent Alert", maxLines = 1) },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
-                            )
-                            FilterChip(
-                                selected = selectedType == "update",
-                                onClick = { selectedType = "update" },
-                                label = { Text("App Update", maxLines = 1) },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
+                    AdminFilterChipRow(
+                        items = listOf("info", "warning", "urgent", "update"),
+                        selectedItem = selectedType,
+                        onSelect = { selectedType = it },
+                        labelProvider = {
+                            when (it) {
+                                "info" -> "Information"
+                                "warning" -> "Warning"
+                                "urgent" -> "Urgent Alert"
+                                "update" -> "App Update"
+                                else -> it.uppercase()
+                            }
+                        },
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
 

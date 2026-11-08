@@ -111,27 +111,27 @@ fun AdminDashboardScreen(
             )
         }
 
-        // ROW 4: Banned Keys & Open Support Tickets (Standard Uniform Cards)
+        // ROW 4: Open Support Tickets & Bug Reports
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             UniformMetricCard(
-                title = "Banned Keys",
-                value = "${s.bannedKeys}",
-                icon = Icons.Filled.Block,
-                iconColor = ColorError,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavigateToPage(2) }
-            )
-
-            UniformMetricCard(
                 title = "Open Tickets",
                 value = "${s.openTickets}",
                 icon = Icons.Filled.QuestionAnswer,
-                iconColor = ColorInfo,
+                iconColor = if (s.openTickets > 0) ColorWarning else ColorInfo,
                 modifier = Modifier.weight(1f),
                 onClick = { onNavigateToPage(3) } // Support page
+            )
+
+            UniformMetricCard(
+                title = "Bug Reports",
+                value = "${s.totalBugReports}",
+                icon = Icons.Filled.BugReport,
+                iconColor = if (s.totalBugReports > 0) ColorError else ColorSuccess,
+                modifier = Modifier.weight(1f),
+                onClick = { onNavigateToPage(8) } // Bug Reports page
             )
         }
 

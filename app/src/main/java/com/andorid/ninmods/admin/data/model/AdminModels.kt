@@ -130,3 +130,22 @@ data class ModUploadResult(
     val fileSizeBytes: Long,
     val verifiedEntriesCount: Int
 )
+
+data class AdminBugItem(
+    val id: Int,
+    val userId: Int?,
+    val username: String?,
+    val licenseKey: String?,
+    val hwid: String?,
+    val deviceModel: String?,
+    val androidVersion: String?,
+    val appVersion: String?,
+    val kernelVersion: String?,
+    val isRoot: Boolean,
+    val title: String,
+    val description: String?,
+    val logcatTrace: String?,
+    val status: String,
+    val adminNotes: String?,
+    val createdAt: String
+)

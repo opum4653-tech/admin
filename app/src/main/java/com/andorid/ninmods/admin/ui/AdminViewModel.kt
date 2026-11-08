@@ -54,6 +54,9 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
     private val _plans = MutableStateFlow<List<SubscriptionPlanItem>>(emptyList())
     val plans: StateFlow<List<SubscriptionPlanItem>> = _plans.asStateFlow()
 
+    private val _bugsList = MutableStateFlow<List<AdminBugItem>>(emptyList())
+    val bugsList: StateFlow<List<AdminBugItem>> = _bugsList.asStateFlow()
+
     init {
         if (_isLoggedIn.value) {
             refreshAll()
@@ -152,6 +155,12 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                         val r = AdminApiClient.getAdminPlans(key)
                         if (r.isSuccess) {
                             _plans.value = r.getOrNull() ?: emptyList()
+                        }
+                    }
+                    launch {
+                        val r = AdminApiClient.getBugReports(key)
+                        if (r.isSuccess) {
+                            _bugsList.value = r.getOrNull() ?: emptyList()
                         }
                     }
                 }
@@ -418,6 +427,24 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                 onResult(true, r.getOrNull() ?: "Ticket created")
             } else {
                 onResult(false, r.exceptionOrNull()?.message ?: "Failed to create ticket")
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun updateBugStatus(bugId: Int, status: String, notes: String = "", onComplete: ((Boolean, String) -> Unit)? = null) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            val r = AdminApiClient.updateBugStatus(key, bugId, status, notes)
+            if (r.isSuccess) {
+                val bugsRes = AdminApiClient.getBugReports(key)
+                if (bugsRes.isSuccess) _bugsList.value = bugsRes.getOrNull() ?: emptyList()
+                val dashRes = AdminApiClient.getDashboard(key)
+                if (dashRes.isSuccess) _dashboardStats.value = dashRes.getOrNull()
+                onComplete?.invoke(true, r.getOrNull() ?: "Status updated")
+            } else {
+                onComplete?.invoke(false, r.exceptionOrNull()?.message ?: "Failed to update status")
             }
             _isLoading.value = false
         }

@@ -47,22 +47,18 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.8
-          name: "NINMODS Admin v1.0.8 (Unified Database Bridge, Enterprise Components & Realtime User Sync)"
+          tag_name: v1.0.9
+          name: "NINMODS Admin v1.0.9 (Enterprise SQL Schema, Client Bug Reporting & Anti-Wrap Layouts)"
           body: |
-            ### NINMODS Admin Android Console v1.0.8
-            Unified Database Integration & Component System:
+            ### NINMODS Admin Android Console v1.0.9
+            Enterprise Database Architecture, Diagnostic Telemetry & Dynamic Navigation:
 
-            #### Key Updates in v1.0.8:
-            - **Unified Database Bridge**: Unified the database authentication and queries between the user loader app and admin console; accounts registered through the user loader now sync in real-time to the dashboard and users directory.
-            - **Resilient Dashboard & User Querying**: Wrapped database statistics in COALESCE null-safe queries with individual try/catch blocks; user counts and wallet totals are never blocked by optional secondary tables.
-            - **Enterprise Component System**: Upgraded all screens with standard components:
-              - `AdminCard`: Unified section container across Settings, Mod Upload, and Profile.
-              - `AdminEmptyState`: Standard centered empty-state display across Keys, Users, Deposits, and Support.
-              - `AdminSearchBar` & `AdminSearchAndActionRow`: Standard search input with integrated primary action button.
-              - `AdminFilterChipRow`: Smooth horizontal filter pill row with zero text-wrapping.
-              - `AdminDetailRow`: Standard key-value metadata rows.
-            - **Synchronous Coroutine Scope**: Refreshed `AdminViewModel.refreshAll()` to await all data sources before dismissing progress state and handle session invalidation cleanly.
+            #### Key Updates in v1.0.9:
+            - **Enterprise SQL Schema Alignment**: Fully matched with business-class `database.sql` supporting unified `users`, `admins`, `license_keys`, `deposits`, `tickets`, `bug_reports`, and `broadcasts`.
+            - **Dynamic Sub-Screen TopBar Navigation**: Replaced the 3-line hamburger menu with a Back button (`ArrowBack`) on all edit and detail screens (`Generate Keys`, `Add User`, `User Profile`, `Ticket Chat`, `Bug Reports`). Eliminated all duplicate internal back arrows and redundant header cards.
+            - **Anti-Wrapping Adaptive Layouts**: Converted Priority Level chips in Push Alerts and Duration presets into horizontal scroll rows with `maxLines = 1` and `softWrap = false`, preventing awkward multi-line syllable breaks ("Warnin/g", "App/Updat/e").
+            - **Client Bug Reports Inspection Screen**: Added dedicated screen to inspect diagnostic crash traces and telemetry submitted from the client loader app with instant status resolution.
+            - **Loader In-App Popups & Banners Integration**: Synchronized broadcast announcements so broadcasts created in the admin panel are immediately presented as modal alerts and banner cards in the loader app.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk

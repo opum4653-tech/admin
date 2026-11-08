@@ -340,7 +340,7 @@ fun AdminGenerateKeyScreen(
                                 selectedPresetHours = hrs
                                 if (hrs != -1) customHoursText = hrs.toString()
                             },
-                            label = { Text(label) },
+                            label = { Text(label, maxLines = 1, softWrap = false) },
                             shape = RoundedCornerShape(12.dp)
                         )
                     }
@@ -413,7 +413,7 @@ fun AdminGenerateKeyScreen(
                         FilterChip(
                             selected = isSelected,
                             onClick = { selectedGameType = type },
-                            label = { Text(label, maxLines = 1) },
+                            label = { Text(label, maxLines = 1, softWrap = false) },
                             shape = RoundedCornerShape(12.dp)
                         )
                     }
@@ -436,7 +436,7 @@ fun AdminGenerateKeyScreen(
                         FilterChip(
                             selected = isSelected,
                             onClick = { maxDevices = count },
-                            label = { Text("$count Device${if (count > 1) "s" else ""}", maxLines = 1) },
+                            label = { Text("$count Device${if (count > 1) "s" else ""}", maxLines = 1, softWrap = false) },
                             shape = RoundedCornerShape(12.dp)
                         )
                     }

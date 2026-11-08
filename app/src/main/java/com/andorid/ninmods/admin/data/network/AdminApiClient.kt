@@ -782,4 +782,65 @@ object AdminApiClient {
             Result.failure(e)
         }
     }
+
+    suspend fun getBugReports(apiKey: String): Result<List<AdminBugItem>> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/bugs", "GET", apiKey)
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
+                val array = json.optJSONArray("bugs") ?: JSONArray()
+                val list = mutableListOf<AdminBugItem>()
+                for (i in 0 until array.length()) {
+                    val item = array.getJSONObject(i)
+                    list.add(
+                        AdminBugItem(
+                            id = item.optInt("id"),
+                            userId = item.optInt("user_id").takeIf { it > 0 },
+                            username = item.optString("user_username").takeIf { it.isNotBlank() && it != "null" }
+                                ?: item.optString("username").takeIf { it.isNotBlank() && it != "null" },
+                            licenseKey = item.optString("license_key").takeIf { it.isNotBlank() && it != "null" },
+                            hwid = item.optString("hwid").takeIf { it.isNotBlank() && it != "null" },
+                            deviceModel = item.optString("device_model", "Unknown Device"),
+                            androidVersion = item.optString("android_version"),
+                            appVersion = item.optString("app_version"),
+                            kernelVersion = item.optString("kernel_version"),
+                            isRoot = item.optInt("is_root", 0) == 1,
+                            title = item.optString("title", "Bug Report #${item.optInt("id")}"),
+                            description = item.optString("description").takeIf { it.isNotBlank() && it != "null" },
+                            logcatTrace = item.optString("logcat_trace").takeIf { it.isNotBlank() && it != "null" },
+                            status = item.optString("status", "open"),
+                            adminNotes = item.optString("admin_notes").takeIf { it.isNotBlank() && it != "null" },
+                            createdAt = item.optString("created_at")
+                        )
+                    )
+                }
+                Result.success(list)
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to load bug reports")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateBugStatus(apiKey: String, bugId: Int, status: String, adminNotes: String = ""): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/bugs/$bugId/status", "POST", apiKey)
+            val payload = JSONObject().apply {
+                put("status", status)
+                put("admin_notes", adminNotes)
+            }
+            sendJson(conn, payload.toString())
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode in 200..201 && json.optBoolean("success", true)) {
+                Result.success(json.optString("message", "Status updated successfully"))
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to update bug status")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

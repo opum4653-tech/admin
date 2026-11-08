@@ -39,6 +39,7 @@ import com.andorid.ninmods.admin.ui.AdminViewModel
 import com.andorid.ninmods.admin.ui.components.ResponsiveContentBox
 import com.andorid.ninmods.admin.ui.screens.AdminProfileScreen
 import com.andorid.ninmods.admin.ui.screens.broadcast.AdminBroadcastScreen
+import com.andorid.ninmods.admin.ui.screens.bugs.AdminBugReportsScreen
 import com.andorid.ninmods.admin.ui.screens.dashboard.AdminDashboardScreen
 import com.andorid.ninmods.admin.ui.screens.deposits.AdminDepositsScreen
 import com.andorid.ninmods.admin.ui.screens.keys.AdminGenerateKeyScreen
@@ -69,6 +70,7 @@ enum class AdminDestination(
     DEPOSITS("Deposits", "Review & Manual Credit", Icons.Filled.AccountBalanceWallet),
     UPLOAD("Mod Deploy", "Package Upload", Icons.Filled.CloudUpload),
     BROADCAST("Push Alerts", "In-App Dialog & Image Banner", Icons.Filled.Campaign),
+    BUG_REPORTS("Bug Reports", "Crash Telemetry & Logs", Icons.Filled.BugReport),
     SETTINGS("Game Configurations", "Engine Toggles & Pricing", Icons.Filled.Tune),
     PROFILE("Admin Profile", "Security & Session", Icons.Filled.AccountCircle)
 }
@@ -94,6 +96,7 @@ fun MainAppScreen(
     val ticketsList by viewModel.ticketsList.collectAsState()
     val gameConfigs by viewModel.gameConfigs.collectAsState()
     val plans by viewModel.plans.collectAsState()
+    val bugsList by viewModel.bugsList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     val adminUsername = viewModel.sessionManager.username ?: "Admin"
@@ -390,6 +393,7 @@ fun MainAppScreen(
                                     5 -> AdminDestination.UPLOAD
                                     6 -> AdminDestination.SETTINGS
                                     7 -> AdminDestination.PROFILE
+                                    8 -> AdminDestination.BUG_REPORTS
                                     else -> AdminDestination.DASHBOARD
                                 }
                             },
@@ -468,14 +472,9 @@ fun MainAppScreen(
                             tickets = ticketsList,
                             isLoading = isLoading,
                             onRefresh = { viewModel.refreshAll() },
-                            onLoadTicketReplies = { ticketId, onResult ->
-                                viewModel.loadTicketReplies(ticketId, onResult)
-                            },
-                            onReplyTicket = { ticketId, message, onComplete ->
-                                viewModel.replyTicket(ticketId, message, onComplete)
-                            },
-                            onUpdateTicketStatus = { ticketId, status ->
-                                viewModel.updateTicketStatus(ticketId, status)
+                            onSelectTicket = { ticket ->
+                                selectedTicketForChat = ticket
+                                currentDestination = AdminDestination.TICKET_CHAT
                             },
                             onCreateTicket = { targetUserId, subject, message, priority ->
                                 viewModel.createAdminTicket(targetUserId, subject, message, priority) { success, msg ->
@@ -526,6 +525,15 @@ fun MainAppScreen(
                                 viewModel.sendBroadcastNotification(title, message, type, imageUrl, isPopup, targetUserId) { success, msg ->
                                     onComplete(success, msg)
                                 }
+                            }
+                        )
+
+                        AdminDestination.BUG_REPORTS -> AdminBugReportsScreen(
+                            bugs = bugsList,
+                            isLoading = isLoading,
+                            onRefresh = { viewModel.refreshAll() },
+                            onUpdateStatus = { bugId, status, notes, onComplete ->
+                                viewModel.updateBugStatus(bugId, status, notes, onComplete)
                             }
                         )
 
