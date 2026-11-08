@@ -47,28 +47,22 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.3
-          name: "NINMODS Admin v1.0.3 (DriverLoader Bottom Sheets & Push Broadcast Suite)"
+          tag_name: v1.0.4
+          name: "NINMODS Admin v1.0.4 (Dedicated Workflow Pages & Metric Alignment)"
           body: |
-            ### NINMODS Admin Android Console v1.0.3
-            Major overhaul adhering strictly to APatch & DriverLoader design specifications:
+            ### NINMODS Admin Android Console v1.0.4
+            Refinement and privacy hardening:
 
-            #### Key Updates in v1.0.3:
-            - **All Center Dialogs Replaced with Bottom Sheets**: 100% of popups replaced with smooth bottom sheets sliding up from the bottom (identical to `DriverLoader` driver-load modal sheets). All housed inside dedicated `ui/dialogs/` package:
-              - `BulkKeyGeneratorBottomSheet`
-              - `KeyActionBottomSheet` (Extend validity, Reset HWID, Ban/Unban)
-              - `UserActionBottomSheet` (3-dots user actions)
-              - `UserInfoBottomSheet` (Full profile inspector)
-              - `AdjustBalanceBottomSheet` (Credit/Debit wallet funds)
-              - `ChangeRoleBottomSheet` (Role modification)
-              - `ApproveDepositBottomSheet` & `RejectDepositBottomSheet`
-              - `ManualDepositBottomSheet` (Admin manual wallet funding)
-              - `SendNotificationBottomSheet` (In-App popup & image broadcasting)
-              - `NewTicketBottomSheet` (Direct message dispatch)
-              - `EditGameConfigBottomSheet` & `ChangePasswordBottomSheet`
-            - **Real-Time Push Popups & Image Broadcasts**: Admin console can now push in-app modal popups, banners, and update notices directly to client devices with custom image URLs and priority levels.
-            - **Messaging Page Floating Action Button (FAB)**: Support screen equipped with APatch-native FAB (`Icons.Filled.Add`) at bottom-right for initiating direct messages to users.
-            - **APatch Drawer Alignment**: Side drawer edges flattened (`RectangleShape`), eliminating rounded corners to match APatch official UI rules.
+            #### Key Updates in v1.0.4:
+            - **All 8 Dashboard Metric Cards Standardized**: Symmetrical `UniformMetricCard`s (112.dp height, centered typography, zero font clipping or overflow across all 8 telemetry points).
+            - **Dedicated Workflow Pages**:
+              - `AdminGenerateKeyScreen`: Full dedicated page for license key generation with searchable user binding dropdown, quantity stepper, duration presets, engine selector, and device limits.
+              - `AdminAddUserScreen`: Dedicated page to create new user accounts with role selection and initial wallet balance.
+            - **Branding & Privacy Hardening**:
+              - All APatch branding, links, and backend doc references scrubbed from UI.
+              - Mod Upload and Settings screens stripped of raw backend domain URLs, server plate lines, and file paths.
+            - **Clean TopBar Title**: Single clean title displayed beside drawer menu button (e.g. "Dashboard", "Users", etc.) without subtitle duplication.
+            - **Loading Progress Spinners**: Action buttons now feature official `CircularProgressIndicator` during asynchronous tasks.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk

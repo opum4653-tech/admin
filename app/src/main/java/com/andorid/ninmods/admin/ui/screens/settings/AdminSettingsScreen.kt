@@ -1,6 +1,5 @@
 package com.andorid.ninmods.admin.ui.screens.settings
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,15 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.andorid.ninmods.admin.config.AdminConfig
 import com.andorid.ninmods.admin.data.model.GameConfigItem
 import com.andorid.ninmods.admin.data.model.SubscriptionPlanItem
-import com.andorid.ninmods.admin.ui.components.ApatchGreen
-import com.andorid.ninmods.admin.ui.components.ApatchOrange
-import com.andorid.ninmods.admin.ui.components.ApatchRed
+import com.andorid.ninmods.admin.ui.components.MetricGreen
+import com.andorid.ninmods.admin.ui.components.MetricOrange
 import com.andorid.ninmods.admin.ui.components.StatusBadgePill
 import com.andorid.ninmods.admin.ui.components.SwitchItem
 import com.andorid.ninmods.admin.ui.dialogs.EditGameConfigBottomSheet
@@ -161,7 +157,7 @@ fun AdminSettingsScreen(
                                         Text(
                                             text = "Notice: ${cfg.noticeMessage}",
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = ApatchOrange
+                                            color = MetricOrange
                                         )
                                     }
 
@@ -265,73 +261,11 @@ fun AdminSettingsScreen(
                                         text = "\$${String.format("%.2f", plan.retailPrice)}",
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
-                                        color = ApatchGreen
+                                        color = MetricGreen
                                     )
                                 }
                             }
                         }
-                    }
-                }
-            }
-        }
-
-        // 3. API & Cloud Infrastructure Card
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.CloudSync,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "API & INFRASTRUCTURE",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "Admin API Endpoint:",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = AdminConfig.BASE_URL,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
                     }
                 }
             }

@@ -5,7 +5,6 @@ import android.util.Base64
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,15 +15,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.andorid.ninmods.admin.data.model.ModUploadResult
-import com.andorid.ninmods.admin.ui.components.ApatchGreen
-import com.andorid.ninmods.admin.ui.components.ApatchOrange
-import com.andorid.ninmods.admin.ui.components.ApatchRed
+import com.andorid.ninmods.admin.ui.components.LoadingButton
+import com.andorid.ninmods.admin.ui.components.MetricGreen
+import com.andorid.ninmods.admin.ui.components.MetricRed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -53,7 +51,7 @@ fun AdminModUploadScreen(
     fun scanAndPrepareZip(uri: Uri) {
         scope.launch {
             try {
-                scanLogMessages = listOf("[*] Reading file header and validating ZIP structure...")
+                scanLogMessages = listOf("[*] Validating ZIP package structure...")
                 val contentResolver = context.contentResolver
 
                 val inputStream: InputStream? = contentResolver.openInputStream(uri)
@@ -71,7 +69,7 @@ fun AdminModUploadScreen(
 
                 // Check magic bytes PK\x03\x04
                 if (bytes.size < 4 || bytes[0] != 0x50.toByte() || bytes[1] != 0x4B.toByte() || bytes[2] != 0x03.toByte() || bytes[3] != 0x04.toByte()) {
-                    scanLogMessages = listOf("[-] Security Violation: File is not a valid ZIP binary archive (Invalid magic bytes).")
+                    scanLogMessages = listOf("[-] Security Violation: File is not a valid ZIP binary archive.")
                     securityScanPassed = false
                     return@launch
                 }
@@ -89,7 +87,6 @@ fun AdminModUploadScreen(
                     ".js", ".vbs", ".ps1", ".jar", ".war", ".jsp", ".asp", ".aspx"
                 )
 
-                // Inspect internal entries
                 val foundEntries = mutableListOf<String>()
                 var violationDetected = false
                 var violationReason = ""
@@ -104,7 +101,7 @@ fun AdminModUploadScreen(
                             // Path traversal check
                             if (name.contains("..") || name.startsWith("/") || name.startsWith("\\")) {
                                 violationDetected = true
-                                violationReason = "Path traversal detected in archive: '$name'"
+                                violationReason = "Path traversal detected in archive"
                                 break
                             }
 
@@ -113,7 +110,7 @@ fun AdminModUploadScreen(
                             for (ext in blacklistedExtensions) {
                                 if (lower.endsWith(ext) || lower.contains("$ext.")) {
                                     violationDetected = true
-                                    violationReason = "Disallowed shell/script extension detected: '$name'"
+                                    violationReason = "Disallowed executable script detected: '$name'"
                                     break
                                 }
                             }
@@ -129,11 +126,11 @@ fun AdminModUploadScreen(
                     securityScanPassed = false
                 } else {
                     scanLogMessages = listOf(
-                        "[+] File integrity check: PASSED",
-                        "[+] Verified ZIP signature (PK\\x03\\x04)",
+                        "[+] Integrity verification: PASSED",
+                        "[+] Validated ZIP signature",
                         "[+] Anti-shell scan: 0 malicious scripts detected",
-                        "[+] Verified ${foundEntries.size} entries inside archive.",
-                        "[+] Target package: ${if (selectedModType == "external") "gemini-cli.zip" else "ninmods-kernel.zip"}"
+                        "[+] Verified ${foundEntries.size} binary assets inside package",
+                        "[+] Target mode: ${if (selectedModType == "external") "External Overlay Engine" else "Direct Kernel Engine"}"
                     )
                     securityScanPassed = true
                 }
@@ -237,12 +234,11 @@ fun AdminModUploadScreen(
 
                 Text(
                     text = if (selectedModType == "external") {
-                        "Target File: https://ninmods.smmtor.com/downloads/external/gemini-cli.zip"
+                        "Target Profile: External Floating Overlay Module"
                     } else {
-                        "Target File: https://ninmods.smmtor.com/downloads/kernel/ninmods-kernel.zip"
+                        "Target Profile: Direct Kernel Injection Module"
                     },
                     style = MaterialTheme.typography.labelSmall,
-                    fontFamily = FontFamily.Monospace,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -314,8 +310,8 @@ fun AdminModUploadScreen(
                         ) {
                             scanLogMessages.forEach { msg ->
                                 val color = when {
-                                    msg.startsWith("[+]") -> ApatchGreen
-                                    msg.startsWith("[-]") -> ApatchRed
+                                    msg.startsWith("[+]") -> MetricGreen
+                                    msg.startsWith("[-]") -> MetricRed
                                     else -> MaterialTheme.colorScheme.primary
                                 }
                                 Text(
@@ -331,8 +327,11 @@ fun AdminModUploadScreen(
             }
         }
 
-        // Upload Action Button
-        Button(
+        // Upload Action Button with Spinner
+        LoadingButton(
+            text = "DEPLOY MOD TO SERVER",
+            isLoading = isUploading,
+            enabled = selectedUri != null && securityScanPassed,
             onClick = {
                 val uri = selectedUri
                 if (uri != null && securityScanPassed && !isUploading) {
@@ -369,43 +368,20 @@ fun AdminModUploadScreen(
                     }
                 }
             },
-            enabled = selectedUri != null && securityScanPassed && !isUploading,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            if (isUploading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.5.dp
-                )
-            } else {
-                Icon(imageVector = Icons.Filled.CloudDone, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "DEPLOY MOD TO SERVER",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
+            icon = Icons.Filled.CloudDone,
+            modifier = Modifier.fillMaxWidth()
+        )
 
         if (uploadStatusMessage != null) {
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = if (isUploadSuccess) ApatchGreen.copy(alpha = 0.15f) else ApatchRed.copy(alpha = 0.15f),
+                color = if (isUploadSuccess) MetricGreen.copy(alpha = 0.15f) else MetricRed.copy(alpha = 0.15f),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = uploadStatusMessage!!,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isUploadSuccess) ApatchGreen else ApatchRed,
+                    color = if (isUploadSuccess) MetricGreen else MetricRed,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(14.dp)
                 )

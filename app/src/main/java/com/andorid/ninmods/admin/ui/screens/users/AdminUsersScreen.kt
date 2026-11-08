@@ -37,6 +37,7 @@ fun AdminUsersScreen(
     onUserAction: (userId: Int, action: String, reason: String) -> Unit,
     onUpdateBalance: (userId: Int, action: String, amount: Double, notes: String) -> Unit,
     onChangeRole: (userId: Int, newRole: String) -> Unit,
+    onNavigateToAddUser: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -67,32 +68,55 @@ fun AdminUsersScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        // Search Bar
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            placeholder = { Text("Search by username, email, phone...", style = MaterialTheme.typography.bodyMedium) },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            trailingIcon = {
-                if (searchQuery.isNotBlank()) {
-                    IconButton(onClick = { searchQuery = "" }) {
-                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Clear", modifier = Modifier.size(18.dp))
-                    }
-                }
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(16.dp),
+        // Search & Add User Row
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp)
-        )
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Search by username, email...", style = MaterialTheme.typography.bodyMedium) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotBlank()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(imageVector = Icons.Filled.Close, contentDescription = "Clear", modifier = Modifier.size(18.dp))
+                        }
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.weight(1f)
+            )
+
+            if (onNavigateToAddUser != null) {
+                Button(
+                    onClick = onNavigateToAddUser,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.PersonAdd,
+                        contentDescription = "Add User",
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
 
         // Role & Status Filter Pills
         Row(

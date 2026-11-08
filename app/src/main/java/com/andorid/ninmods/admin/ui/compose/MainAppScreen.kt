@@ -27,35 +27,39 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.andorid.ninmods.admin.R
 import com.andorid.ninmods.admin.ui.AdminViewModel
-import com.andorid.ninmods.admin.ui.dialogs.BulkKeyGeneratorBottomSheet
 import com.andorid.ninmods.admin.ui.dialogs.SendNotificationBottomSheet
 import com.andorid.ninmods.admin.ui.screens.AdminProfileScreen
 import com.andorid.ninmods.admin.ui.screens.dashboard.AdminDashboardScreen
 import com.andorid.ninmods.admin.ui.screens.deposits.AdminDepositsScreen
+import com.andorid.ninmods.admin.ui.screens.keys.AdminGenerateKeyScreen
 import com.andorid.ninmods.admin.ui.screens.keys.AdminKeysScreen
 import com.andorid.ninmods.admin.ui.screens.settings.AdminSettingsScreen
 import com.andorid.ninmods.admin.ui.screens.support.AdminSupportScreen
 import com.andorid.ninmods.admin.ui.screens.upload.AdminModUploadScreen
+import com.andorid.ninmods.admin.ui.screens.users.AdminAddUserScreen
 import com.andorid.ninmods.admin.ui.screens.users.AdminUsersScreen
 import kotlinx.coroutines.launch
 
 enum class AdminDestination(
     val title: String,
     val subtitle: String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val showInDrawer: Boolean = true
 ) {
     DASHBOARD("Dashboard", "Telemetry & Metrics", Icons.Filled.Dashboard),
-    USERS("Users Management", "Accounts & Access Control", Icons.Filled.People),
-    KEYS("License Keys", "Key Generator & Resets", Icons.Filled.VpnKey),
-    SUPPORT("Support Messaging", "Live Tickets & Threads", Icons.Filled.SupportAgent),
-    DEPOSITS("Deposits & Wallets", "Review & Manual Credit", Icons.Filled.AccountBalanceWallet),
-    UPLOAD("Mod Deployment", "Anti-Shell ZIP Upload", Icons.Filled.CloudUpload),
+    USERS("Users", "Accounts & Access Control", Icons.Filled.People),
+    KEYS("License Keys", "Key Management & Stock", Icons.Filled.VpnKey),
+    GENERATE_KEY("Generate Keys", "Batch Generator & Bindings", Icons.Filled.Key, false),
+    ADD_USER("Add User", "Create User Account", Icons.Filled.PersonAdd, false),
+    SUPPORT("Support", "Live Tickets & Threads", Icons.Filled.SupportAgent),
+    DEPOSITS("Deposits", "Review & Manual Credit", Icons.Filled.AccountBalanceWallet),
+    UPLOAD("Mod Deployment", "Package Upload", Icons.Filled.CloudUpload),
     BROADCAST("Push Popups & Alerts", "In-App Dialog & Image Banner", Icons.Filled.Campaign),
-    SETTINGS("Game Configurations", "FF Versions & Features", Icons.Filled.Tune),
+    SETTINGS("Game Configurations", "Engine Toggles & Pricing", Icons.Filled.Tune),
     PROFILE("Admin Profile", "Security & Session", Icons.Filled.AccountCircle)
 }
 
@@ -66,7 +70,6 @@ fun MainAppScreen(
     onSignOut: () -> Unit
 ) {
     var currentDestination by remember { mutableStateOf(AdminDestination.DASHBOARD) }
-    var showBulkKeySheet by remember { mutableStateOf(false) }
     var showBroadcastSheet by remember { mutableStateOf(false) }
     var lastBackPressTime by remember { mutableLongStateOf(0L) }
     val context = LocalContext.current
@@ -85,7 +88,7 @@ fun MainAppScreen(
     val adminUsername = viewModel.sessionManager.username ?: "Admin"
     val adminRole = viewModel.sessionManager.role ?: "admin"
 
-    // APatch Drawer and BackHandler Hierarchy
+    // Drawer and BackHandler Hierarchy
     BackHandler(enabled = drawerState.isOpen) {
         scope.launch { drawerState.close() }
     }
@@ -111,7 +114,7 @@ fun MainAppScreen(
                 modifier = Modifier
                     .width(320.dp)
                     .fillMaxHeight(),
-                drawerShape = RectangleShape, // Straight non-rounded edges strictly matching APatch official UI
+                drawerShape = RectangleShape,
                 drawerContainerColor = MaterialTheme.colorScheme.surface
             ) {
                 Column(
@@ -149,7 +152,7 @@ fun MainAppScreen(
 
                             Column {
                                 Text(
-                                    text = "NINMODS ADMIN",
+                                    text = "ADMIN CONSOLE",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -175,7 +178,7 @@ fun MainAppScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        AdminDestination.values().forEach { destination ->
+                        AdminDestination.values().filter { it.showInDrawer }.forEach { destination ->
                             val isSelected = currentDestination == destination
                             NavigationDrawerItem(
                                 icon = {
@@ -186,20 +189,12 @@ fun MainAppScreen(
                                     )
                                 },
                                 label = {
-                                    Column {
-                                        Text(
-                                            text = destination.title,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = destination.subtitle,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-                                            fontSize = 11.sp
-                                        )
-                                    }
+                                    Text(
+                                        text = destination.title,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
                                 },
                                 selected = isSelected,
                                 onClick = {
@@ -256,7 +251,7 @@ fun MainAppScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "APatch Admin Engine v1.0.2",
+                        text = "Admin Console v1.0.4",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -269,19 +264,14 @@ fun MainAppScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Column {
-                            Text(
-                                text = currentDestination.title,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = currentDestination.subtitle,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        Text(
+                            text = currentDestination.title,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -350,7 +340,7 @@ fun MainAppScreen(
                                 else -> AdminDestination.DASHBOARD
                             }
                         },
-                        onOpenBulkGenerate = { showBulkKeySheet = true }
+                        onOpenBulkGenerate = { currentDestination = AdminDestination.GENERATE_KEY }
                     )
 
                     AdminDestination.USERS -> AdminUsersScreen(
@@ -365,7 +355,15 @@ fun MainAppScreen(
                         },
                         onChangeRole = { userId, newRole ->
                             viewModel.changeUserRole(userId, newRole)
-                        }
+                        },
+                        onNavigateToAddUser = { currentDestination = AdminDestination.ADD_USER }
+                    )
+
+                    AdminDestination.ADD_USER -> AdminAddUserScreen(
+                        onCreateUser = { u, e, p, r, b, onResult ->
+                            viewModel.createUser(u, e, p, r, b, onResult)
+                        },
+                        onNavigateBack = { currentDestination = AdminDestination.USERS }
                     )
 
                     AdminDestination.KEYS -> AdminKeysScreen(
@@ -375,7 +373,17 @@ fun MainAppScreen(
                         onActionClick = { keyId, action, hours ->
                             viewModel.executeKeyAction(keyId, action, hours)
                         },
-                        onOpenBulkGenerate = { showBulkKeySheet = true }
+                        onOpenBulkGenerate = { currentDestination = AdminDestination.GENERATE_KEY }
+                    )
+
+                    AdminDestination.GENERATE_KEY -> AdminGenerateKeyScreen(
+                        users = usersList,
+                        onGenerateKeys = { q, dh, dt, gt, md, n, targetUserId, onComplete ->
+                            viewModel.generateBulkKeys(q, dh, dt, gt, md, n, targetUserId) { success, msg ->
+                                onComplete(success, msg)
+                            }
+                        },
+                        onNavigateBack = { currentDestination = AdminDestination.KEYS }
                     )
 
                     AdminDestination.SUPPORT -> AdminSupportScreen(
@@ -444,16 +452,6 @@ fun MainAppScreen(
                 }
             }
         }
-    }
-
-    // Bulk Key Generator Bottom Sheet (slides up from bottom)
-    if (showBulkKeySheet) {
-        BulkKeyGeneratorBottomSheet(
-            onDismiss = { showBulkKeySheet = false },
-            onGenerate = { q, dh, dt, gt, md, n ->
-                viewModel.generateBulkKeys(q, dh, dt, gt, md, n)
-            }
-        )
     }
 
     // In-App Popup / Push Broadcast Bottom Sheet (slides up from bottom)

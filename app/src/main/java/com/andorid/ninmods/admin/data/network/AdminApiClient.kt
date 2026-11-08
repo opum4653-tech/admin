@@ -163,7 +163,8 @@ object AdminApiClient {
         durationType: String,
         gameType: String,
         maxDevices: Int,
-        notes: String
+        notes: String,
+        targetUserId: Int? = null
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             val conn = openConnection("/keys/generate", "POST", apiKey)
@@ -174,6 +175,9 @@ object AdminApiClient {
                 put("game_type", gameType)
                 put("max_devices", maxDevices)
                 put("notes", notes)
+                if (targetUserId != null && targetUserId > 0) {
+                    put("target_user_id", targetUserId)
+                }
             }
             sendJson(conn, payload.toString())
             val resText = readResponse(conn)
@@ -282,6 +286,36 @@ object AdminApiClient {
                 Result.success(json.optString("message", "User role updated successfully"))
             } else {
                 Result.failure(Exception(json.optString("error", "Role change failed")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createUser(
+        apiKey: String,
+        username: String,
+        email: String,
+        password: String,
+        role: String = "user",
+        initialBalance: Double = 0.0
+    ): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/users/create", "POST", apiKey)
+            val payload = JSONObject().apply {
+                put("username", username.trim())
+                put("email", email.trim())
+                put("password", password)
+                put("role", role.lowercase())
+                put("initial_balance", initialBalance)
+            }
+            sendJson(conn, payload.toString())
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode in 200..201 && json.optBoolean("success", true)) {
+                Result.success(json.optString("message", "User created successfully"))
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to create user")))
             }
         } catch (e: Exception) {
             Result.failure(e)

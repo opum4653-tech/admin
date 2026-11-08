@@ -227,16 +227,53 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun generateBulkKeys(quantity: Int, durationHours: Int, durationType: String, gameType: String, maxDevices: Int, notes: String) {
+    fun generateBulkKeys(
+        quantity: Int,
+        durationHours: Int,
+        durationType: String,
+        gameType: String,
+        maxDevices: Int,
+        notes: String,
+        targetUserId: Int? = null,
+        onResult: ((Boolean, String) -> Unit)? = null
+    ) {
         val key = sessionManager.apiKey ?: return
         viewModelScope.launch {
             _isLoading.value = true
-            val r = AdminApiClient.generateBulkKeys(key, quantity, durationHours, durationType, gameType, maxDevices, notes)
+            val r = AdminApiClient.generateBulkKeys(key, quantity, durationHours, durationType, gameType, maxDevices, notes, targetUserId)
             if (r.isSuccess) {
                 val keysRes = AdminApiClient.getKeys(key)
                 if (keysRes.isSuccess) _keysList.value = keysRes.getOrNull() ?: emptyList()
                 val dashRes = AdminApiClient.getDashboard(key)
                 if (dashRes.isSuccess) _dashboardStats.value = dashRes.getOrNull()
+                onResult?.invoke(true, r.getOrNull() ?: "Generated successfully")
+            } else {
+                onResult?.invoke(false, r.exceptionOrNull()?.message ?: "Generation failed")
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun createUser(
+        username: String,
+        email: String,
+        pass: String,
+        role: String,
+        initialBalance: Double,
+        onResult: (Boolean, String) -> Unit
+    ) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            val r = AdminApiClient.createUser(key, username, email, pass, role, initialBalance)
+            if (r.isSuccess) {
+                val usersRes = AdminApiClient.getUsers(key)
+                if (usersRes.isSuccess) _usersList.value = usersRes.getOrNull() ?: emptyList()
+                val dashRes = AdminApiClient.getDashboard(key)
+                if (dashRes.isSuccess) _dashboardStats.value = dashRes.getOrNull()
+                onResult(true, r.getOrNull() ?: "User created successfully")
+            } else {
+                onResult(false, r.exceptionOrNull()?.message ?: "Failed to create user")
             }
             _isLoading.value = false
         }
