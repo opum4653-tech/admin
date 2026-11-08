@@ -1,16 +1,25 @@
 package com.andorid.ninmods.admin.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 // Standard Metric Palette
@@ -88,7 +97,7 @@ fun StatusBadgePill(
 @Composable
 fun ResponsiveContentBox(
     modifier: Modifier = Modifier,
-    maxWidth: androidx.compose.ui.unit.Dp = 760.dp,
+    maxWidth: Dp = 760.dp,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
@@ -291,7 +300,7 @@ fun AdminEmptyState(
             verticalArrangement = Arrangement.Center
         ) {
             Surface(
-                shape = androidx.compose.foundation.shape.CircleShape,
+                shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier.size(64.dp)
             ) {
@@ -316,8 +325,177 @@ fun AdminEmptyState(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
         }
+    }
+}
+
+/**
+ * Standard Enterprise Search Bar.
+ * Unified styling, leading search icon, clear button, and rounded corners across all screens.
+ */
+@Composable
+fun AdminSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium) },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+        },
+        trailingIcon = {
+            if (query.isNotBlank()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Clear",
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(16.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        modifier = modifier
+    )
+}
+
+/**
+ * Standard Enterprise Search & Action Row.
+ * Pairs an AdminSearchBar with a primary CTA button (e.g. + Generate Keys, + Add User, + Deposit).
+ */
+@Composable
+fun AdminSearchAndActionRow(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    placeholder: String,
+    actionButtonText: String,
+    actionButtonIcon: ImageVector,
+    onActionClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        AdminSearchBar(
+            query = query,
+            onQueryChange = onQueryChange,
+            placeholder = placeholder,
+            modifier = Modifier.weight(1f)
+        )
+
+        Button(
+            onClick = onActionClick,
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp)
+        ) {
+            Icon(
+                imageVector = actionButtonIcon,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = actionButtonText,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+/**
+ * Standard Horizontal Filter Chip Row.
+ * Smoothly scrolls horizontally without wrapping or breaking layout across all screen resolutions.
+ */
+@Composable
+fun <T> AdminFilterChipRow(
+    items: List<T>,
+    selectedItem: T,
+    onSelect: (T) -> Unit,
+    labelProvider: (T) -> String = { it.toString() },
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items.forEach { item ->
+            val isSelected = item == selectedItem
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.clickable { onSelect(item) }
+            ) {
+                Text(
+                    text = labelProvider(item),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Standard Detail Information Row.
+ * Pairs a label on the left with a value on the right, maintaining alignment and typography.
+ */
+@Composable
+fun AdminDetailRow(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
+    isMonospace: Boolean = false
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = if (isMonospace) FontFamily.Monospace else null,
+            color = valueColor
+        )
     }
 }

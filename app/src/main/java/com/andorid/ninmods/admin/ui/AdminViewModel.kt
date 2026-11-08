@@ -10,6 +10,7 @@ import com.andorid.ninmods.admin.ui.components.AdminTab
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class AdminViewModel(application: Application) : AndroidViewModel(application) {
@@ -102,46 +103,61 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
         val key = sessionManager.apiKey ?: return
         viewModelScope.launch {
             _isLoading.value = true
-            // 1. Dashboard
-            launch {
-                val r = AdminApiClient.getDashboard(key)
-                if (r.isSuccess) _dashboardStats.value = r.getOrNull()
-            }
-            // 2. Keys
-            launch {
-                val r = AdminApiClient.getKeys(key)
-                if (r.isSuccess) _keysList.value = r.getOrNull() ?: emptyList()
-            }
-            // 3. Users
-            launch {
-                val r = AdminApiClient.getUsers(key)
-                if (r.isSuccess) _usersList.value = r.getOrNull() ?: emptyList()
-            }
-            // 4. Deposits
-            launch {
-                val r = AdminApiClient.getAllDeposits(key)
-                if (r.isSuccess) {
-                    val list = r.getOrNull() ?: emptyList()
-                    _allDeposits.value = list
-                    _pendingDeposits.value = list.filter { it.status.equals("pending", ignoreCase = true) }
+            try {
+                coroutineScope {
+                    launch {
+                        val r = AdminApiClient.getDashboard(key)
+                        if (r.isSuccess) {
+                            _dashboardStats.value = r.getOrNull()
+                        } else {
+                            val msg = r.exceptionOrNull()?.message ?: ""
+                            if (msg.contains("unauthorized", ignoreCase = true) || msg.contains("401") || msg.contains("403")) {
+                                logout()
+                            }
+                        }
+                    }
+                    launch {
+                        val r = AdminApiClient.getUsers(key)
+                        if (r.isSuccess) {
+                            _usersList.value = r.getOrNull() ?: emptyList()
+                        }
+                    }
+                    launch {
+                        val r = AdminApiClient.getKeys(key)
+                        if (r.isSuccess) {
+                            _keysList.value = r.getOrNull() ?: emptyList()
+                        }
+                    }
+                    launch {
+                        val r = AdminApiClient.getAllDeposits(key)
+                        if (r.isSuccess) {
+                            val list = r.getOrNull() ?: emptyList()
+                            _allDeposits.value = list
+                            _pendingDeposits.value = list.filter { it.status.equals("pending", ignoreCase = true) }
+                        }
+                    }
+                    launch {
+                        val r = AdminApiClient.getSupportTickets(key)
+                        if (r.isSuccess) {
+                            _ticketsList.value = r.getOrNull() ?: emptyList()
+                        }
+                    }
+                    launch {
+                        val r = AdminApiClient.getGameConfigs(key)
+                        if (r.isSuccess) {
+                            _gameConfigs.value = r.getOrNull() ?: emptyList()
+                        }
+                    }
+                    launch {
+                        val r = AdminApiClient.getAdminPlans(key)
+                        if (r.isSuccess) {
+                            _plans.value = r.getOrNull() ?: emptyList()
+                        }
+                    }
                 }
+            } finally {
+                _isLoading.value = false
             }
-            // 5. Tickets
-            launch {
-                val r = AdminApiClient.getSupportTickets(key)
-                if (r.isSuccess) _ticketsList.value = r.getOrNull() ?: emptyList()
-            }
-            // 6. Game Configs
-            launch {
-                val r = AdminApiClient.getGameConfigs(key)
-                if (r.isSuccess) _gameConfigs.value = r.getOrNull() ?: emptyList()
-            }
-            // 7. Plans
-            launch {
-                val r = AdminApiClient.getAdminPlans(key)
-                if (r.isSuccess) _plans.value = r.getOrNull() ?: emptyList()
-            }
-            _isLoading.value = false
         }
     }
 

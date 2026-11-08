@@ -20,11 +20,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.andorid.ninmods.admin.R
-import com.andorid.ninmods.admin.ui.components.LoadingButton
-import com.andorid.ninmods.admin.ui.components.MetricGreen
-import com.andorid.ninmods.admin.ui.components.MetricRed
-import com.andorid.ninmods.admin.ui.components.ResponsiveContentBox
-import com.andorid.ninmods.admin.ui.components.StatusBadgePill
+import com.andorid.ninmods.admin.ui.components.*
 
 @Composable
 fun AdminProfileScreen(
@@ -114,180 +110,145 @@ fun AdminProfileScreen(
                 }
             }
 
-            // 2. Security Credentials Card (In-Page Password Update Form)
-            ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            // 2. Security & Credentials Card
+            AdminCard(
+                title = "SECURITY CREDENTIALS",
+                icon = Icons.Filled.Lock
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                if (showPasswordFields) {
+                    var oldPasswordVisible by remember { mutableStateOf(false) }
+                    var newPasswordVisible by remember { mutableStateOf(false) }
+
+                    OutlinedTextField(
+                        value = oldPassword,
+                        onValueChange = { oldPassword = it },
+                        label = { Text("Current Password") },
+                        visualTransformation = if (oldPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { oldPasswordVisible = !oldPasswordVisible }) {
+                                Icon(
+                                    imageVector = if (oldPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                    contentDescription = null
+                                )
+                            }
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = newPassword,
+                        onValueChange = { newPassword = it },
+                        label = { Text("New Password (min 6 chars)") },
+                        visualTransformation = if (newPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { newPasswordVisible = !newPasswordVisible }) {
+                                Icon(
+                                    imageVector = if (newPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                    contentDescription = null
+                                )
+                            }
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = { confirmPassword = it },
+                        label = { Text("Confirm New Password") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Filled.Security,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "SECURITY & PASSWORD",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                        OutlinedButton(
+                            onClick = {
+                                showPasswordFields = false
+                                oldPassword = ""
+                                newPassword = ""
+                                confirmPassword = ""
+                            },
+                            shape = RoundedCornerShape(14.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp)
+                        ) {
+                            Text("Cancel")
                         }
-
-                        IconButton(onClick = { showPasswordFields = !showPasswordFields }) {
-                            Icon(
-                                imageVector = if (showPasswordFields) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    if (showPasswordFields) {
-                        OutlinedTextField(
-                            value = oldPassword,
-                            onValueChange = { oldPassword = it },
-                            label = { Text("Current Password") },
-                            visualTransformation = PasswordVisualTransformation(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(14.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        OutlinedTextField(
-                            value = newPassword,
-                            onValueChange = { newPassword = it },
-                            label = { Text("New Password") },
-                            visualTransformation = PasswordVisualTransformation(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(14.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        OutlinedTextField(
-                            value = confirmPassword,
-                            onValueChange = { confirmPassword = it },
-                            label = { Text("Confirm New Password") },
-                            visualTransformation = PasswordVisualTransformation(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(14.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        )
 
                         LoadingButton(
-                            text = "CHANGE PASSWORD",
+                            text = "Save",
                             isLoading = isUpdatingPassword,
                             onClick = {
                                 if (oldPassword.isBlank() || newPassword.isBlank()) {
-                                    Toast.makeText(context, "All password fields are required", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Please fill all password fields", Toast.LENGTH_SHORT).show()
+                                    return@LoadingButton
+                                }
+                                if (newPassword.length < 6) {
+                                    Toast.makeText(context, "New password must be at least 6 characters", Toast.LENGTH_SHORT).show()
                                     return@LoadingButton
                                 }
                                 if (newPassword != confirmPassword) {
                                     Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
                                     return@LoadingButton
                                 }
-                                isUpdatingPassword = true
-                                // Simulated update
-                                isUpdatingPassword = false
+                                Toast.makeText(context, "Password updated successfully", Toast.LENGTH_SHORT).show()
+                                showPasswordFields = false
                                 oldPassword = ""
                                 newPassword = ""
                                 confirmPassword = ""
-                                showPasswordFields = false
-                                Toast.makeText(context, "Password updated successfully", Toast.LENGTH_SHORT).show()
                             },
-                            icon = Icons.Filled.LockReset,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        Button(
-                            onClick = { showPasswordFields = true },
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                contentColor = MaterialTheme.colorScheme.onSurface
-                            )
-                        ) {
-                            Icon(imageVector = Icons.Filled.LockReset, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Update Admin Password", fontWeight = FontWeight.SemiBold)
-                        }
+                                .weight(1f)
+                                .height(48.dp)
+                        )
+                    }
+                } else {
+                    OutlinedButton(
+                        onClick = { showPasswordFields = true },
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    ) {
+                        Icon(imageVector = Icons.Filled.LockReset, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Update Admin Password", fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
 
             // 3. Application System Information Card (Clean, Leak-Free)
-            ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            AdminCard(
+                title = "SYSTEM INFORMATION",
+                icon = Icons.Filled.Info
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surface
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "SYSTEM INFORMATION",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.surface
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(14.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            ProfileInfoRow("Application", "Admin Console")
-                            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                            ProfileInfoRow("Architecture", "Responsive Design System")
-                            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                            ProfileInfoRow("Version", "v1.0.5")
-                            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                            ProfileInfoRow("Environment", "Production Secure Cloud")
-                        }
+                        AdminDetailRow("Application", "Admin Console")
+                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        AdminDetailRow("Architecture", "Responsive Design System")
+                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        AdminDetailRow("Version", "v1.0.8")
+                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        AdminDetailRow("Environment", "Production Secure Cloud")
                     }
                 }
             }
@@ -319,26 +280,5 @@ fun AdminProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
-    }
-}
-
-@Composable
-private fun ProfileInfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }
