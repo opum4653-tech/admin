@@ -24,10 +24,7 @@ import com.andorid.ninmods.admin.ui.components.ApatchGreen
 import com.andorid.ninmods.admin.ui.components.ApatchOrange
 import com.andorid.ninmods.admin.ui.components.ApatchRed
 import com.andorid.ninmods.admin.ui.components.StatusBadgePill
-import com.andorid.ninmods.admin.ui.dialogs.AdjustBalanceBottomSheet
-import com.andorid.ninmods.admin.ui.dialogs.ChangeRoleBottomSheet
 import com.andorid.ninmods.admin.ui.dialogs.UserActionBottomSheet
-import com.andorid.ninmods.admin.ui.dialogs.UserInfoBottomSheet
 
 @Composable
 fun AdminUsersScreen(
@@ -38,16 +35,14 @@ fun AdminUsersScreen(
     onUpdateBalance: (userId: Int, action: String, amount: Double, notes: String) -> Unit,
     onChangeRole: (userId: Int, newRole: String) -> Unit,
     onNavigateToAddUser: (() -> Unit)? = null,
+    onSelectUser: ((AdminUserItem) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedRoleFilter by remember { mutableStateOf("ALL") }
 
-    // Bottom Sheet States (No center popups)
+    // Contextual Action Sheet State (Only for quick 3-dots actions)
     var actionSheetUser by remember { mutableStateOf<AdminUserItem?>(null) }
-    var infoDialogUser by remember { mutableStateOf<AdminUserItem?>(null) }
-    var balanceDialogUser by remember { mutableStateOf<AdminUserItem?>(null) }
-    var roleDialogUser by remember { mutableStateOf<AdminUserItem?>(null) }
 
     val roleFilters = listOf("ALL", "USER", "RESELLER", "VIP_RESELLER", "BANNED")
 
@@ -171,6 +166,7 @@ fun AdminUsersScreen(
                 items(filteredUsers, key = { it.id }) { item ->
                     UserCardItem(
                         user = item,
+                        onClick = { onSelectUser?.invoke(item) },
                         onActionClick = { actionSheetUser = item }
                     )
                 }
@@ -178,41 +174,24 @@ fun AdminUsersScreen(
         }
     }
 
-    // User Operations Bottom Sheet (slides up from bottom)
+    // User Operations Bottom Sheet (slides up from bottom for quick actions)
     actionSheetUser?.let { u ->
         UserActionBottomSheet(
             user = u,
             onDismiss = { actionSheetUser = null },
-            onViewInfo = { infoDialogUser = u },
-            onAdjustBalance = { balanceDialogUser = u },
-            onChangeRole = { roleDialogUser = u },
+            onViewInfo = {
+                actionSheetUser = null
+                onSelectUser?.invoke(u)
+            },
+            onAdjustBalance = {
+                actionSheetUser = null
+                onSelectUser?.invoke(u)
+            },
+            onChangeRole = {
+                actionSheetUser = null
+                onSelectUser?.invoke(u)
+            },
             onActionClick = onUserAction
-        )
-    }
-
-    // User Profile Bottom Sheet
-    infoDialogUser?.let { u ->
-        UserInfoBottomSheet(
-            user = u,
-            onDismiss = { infoDialogUser = null }
-        )
-    }
-
-    // Balance Adjustment Bottom Sheet
-    balanceDialogUser?.let { u ->
-        AdjustBalanceBottomSheet(
-            user = u,
-            onDismiss = { balanceDialogUser = null },
-            onConfirm = onUpdateBalance
-        )
-    }
-
-    // Role Promotion Bottom Sheet
-    roleDialogUser?.let { u ->
-        ChangeRoleBottomSheet(
-            user = u,
-            onDismiss = { roleDialogUser = null },
-            onConfirm = onChangeRole
         )
     }
 }
@@ -220,12 +199,19 @@ fun AdminUsersScreen(
 @Composable
 private fun UserCardItem(
     user: AdminUserItem,
+    onClick: (() -> Unit)? = null,
     onActionClick: () -> Unit
 ) {
     val isBanned = user.status.equals("banned", ignoreCase = true)
 
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = if (onClick != null) {
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+        } else {
+            Modifier.fillMaxWidth()
+        },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant

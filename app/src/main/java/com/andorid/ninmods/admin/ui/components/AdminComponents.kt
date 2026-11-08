@@ -81,6 +81,30 @@ fun StatusBadgePill(
 }
 
 /**
+ * Standard Responsive Content Box.
+ * Automatically constrains maximum content width on wide screens (tablets, foldables, landscape)
+ * and centers it symmetrically, while expanding to full width on phones.
+ */
+@Composable
+fun ResponsiveContentBox(
+    modifier: Modifier = Modifier,
+    maxWidth: androidx.compose.ui.unit.Dp = 760.dp,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .widthIn(max = maxWidth),
+            content = content
+        )
+    }
+}
+
+/**
  * Standard Uniform Metric Card for Dashboard.
  * All 8 cards across the dashboard use this identical design, eliminating height mismatches and font overflow.
  */

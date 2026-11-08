@@ -47,22 +47,23 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.4
-          name: "NINMODS Admin v1.0.4 (Dedicated Workflow Pages & Metric Alignment)"
+          tag_name: v1.0.5
+          name: "NINMODS Admin v1.0.5 (Responsive Architecture & Dedicated Pages)"
           body: |
-            ### NINMODS Admin Android Console v1.0.4
-            Refinement and privacy hardening:
+            ### NINMODS Admin Android Console v1.0.5
+            Comprehensive layout flexibility and dedicated screen workflow overhaul:
 
-            #### Key Updates in v1.0.4:
-            - **All 8 Dashboard Metric Cards Standardized**: Symmetrical `UniformMetricCard`s (112.dp height, centered typography, zero font clipping or overflow across all 8 telemetry points).
-            - **Dedicated Workflow Pages**:
-              - `AdminGenerateKeyScreen`: Full dedicated page for license key generation with searchable user binding dropdown, quantity stepper, duration presets, engine selector, and device limits.
-              - `AdminAddUserScreen`: Dedicated page to create new user accounts with role selection and initial wallet balance.
-            - **Branding & Privacy Hardening**:
-              - All APatch branding, links, and backend doc references scrubbed from UI.
-              - Mod Upload and Settings screens stripped of raw backend domain URLs, server plate lines, and file paths.
-            - **Clean TopBar Title**: Single clean title displayed beside drawer menu button (e.g. "Dashboard", "Users", etc.) without subtitle duplication.
-            - **Loading Progress Spinners**: Action buttons now feature official `CircularProgressIndicator` during asynchronous tasks.
+            #### Key Updates in v1.0.5:
+            - **100% Flexible & Responsive UI (`ResponsiveContentBox`)**: Standardized adaptive max-width container ensuring layouts never stretch awkwardly or break on tablets, foldables, or small phones.
+            - **Dedicated Workflow Pages (Zero Awkward Bottom Sheets for Complex Flows)**:
+              - `AdminGenerateKeyScreen`: Full dedicated page for license key generation with searchable user binding.
+              - `AdminAddUserScreen`: Dedicated page to create new user accounts.
+              - `AdminUserDetailScreen`: Dedicated full inspector page for user profile, balance adjustment (credit/debit), role modification, and ban moderation.
+              - `AdminTicketChatScreen`: Dedicated ticket messaging thread with bubble history, user/admin chat, and status actions.
+              - `AdminBroadcastScreen`: Full dedicated screen for pushing in-app modal popups, banners, and update notices.
+            - **Single TopBar Title**: Minimal clean title beside drawer hamburger menu.
+            - **All 8 Dashboard Cards Standardized**: Symmetrical `UniformMetricCard`s (112.dp height, zero font clipping).
+            - **Branding & Privacy Sanitization**: Completely scrubbed APatch mentions, raw domain URLs, and server disk paths.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk
