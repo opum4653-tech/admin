@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -98,26 +99,41 @@ fun MainAppScreen(
     val adminUsername = viewModel.sessionManager.username ?: "Admin"
     val adminRole = viewModel.sessionManager.role ?: "admin"
 
+    val isSubScreen = when (currentDestination) {
+        AdminDestination.GENERATE_KEY,
+        AdminDestination.ADD_USER,
+        AdminDestination.USER_DETAIL,
+        AdminDestination.TICKET_CHAT -> true
+        else -> false
+    }
+
+    val handleBackNavigation = {
+        when (currentDestination) {
+            AdminDestination.GENERATE_KEY -> currentDestination = AdminDestination.KEYS
+            AdminDestination.ADD_USER, AdminDestination.USER_DETAIL -> currentDestination = AdminDestination.USERS
+            AdminDestination.TICKET_CHAT -> currentDestination = AdminDestination.SUPPORT
+            else -> currentDestination = AdminDestination.DASHBOARD
+        }
+    }
+
     // Responsive Back Navigation Hierarchy
     BackHandler(enabled = drawerState.isOpen) {
         scope.launch { drawerState.close() }
     }
 
     BackHandler(enabled = !drawerState.isOpen) {
-        when (currentDestination) {
-            AdminDestination.GENERATE_KEY -> currentDestination = AdminDestination.KEYS
-            AdminDestination.ADD_USER, AdminDestination.USER_DETAIL -> currentDestination = AdminDestination.USERS
-            AdminDestination.TICKET_CHAT -> currentDestination = AdminDestination.SUPPORT
-            AdminDestination.DASHBOARD -> {
-                val now = System.currentTimeMillis()
-                if (now - lastBackPressTime < 2000L) {
-                    (context as? Activity)?.finish()
-                } else {
-                    lastBackPressTime = now
-                    Toast.makeText(context, "Press back again to exit", Toast.LENGTH_SHORT).show()
-                }
+        if (isSubScreen) {
+            handleBackNavigation()
+        } else if (currentDestination != AdminDestination.DASHBOARD) {
+            currentDestination = AdminDestination.DASHBOARD
+        } else {
+            val now = System.currentTimeMillis()
+            if (now - lastBackPressTime < 2000L) {
+                (context as? Activity)?.finish()
+            } else {
+                lastBackPressTime = now
+                Toast.makeText(context, "Press back again to exit", Toast.LENGTH_SHORT).show()
             }
-            else -> currentDestination = AdminDestination.DASHBOARD
         }
     }
 
@@ -273,8 +289,13 @@ fun MainAppScreen(
             topBar = {
                 TopAppBar(
                     title = {
+                        val displayTitle = when (currentDestination) {
+                            AdminDestination.USER_DETAIL -> selectedUserDetail?.username?.let { "User: $it" } ?: "User Profile"
+                            AdminDestination.TICKET_CHAT -> selectedTicketForChat?.let { "Ticket #${it.id}" } ?: "Support Chat"
+                            else -> currentDestination.title
+                        }
                         Text(
-                            text = currentDestination.title,
+                            text = displayTitle,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -283,38 +304,58 @@ fun MainAppScreen(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = "Open Drawer Menu",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
+                        if (isSubScreen) {
+                            IconButton(onClick = handleBackNavigation) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Menu,
+                                    contentDescription = "Open Drawer Menu",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     },
                     actions = {
-                        // Quick Action: Push Popups / Notification (Dedicated Screen)
-                        IconButton(onClick = { currentDestination = AdminDestination.BROADCAST }) {
-                            Icon(
-                                imageVector = Icons.Filled.Campaign,
-                                contentDescription = "Push Alerts",
-                                tint = if (currentDestination == AdminDestination.BROADCAST) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        if (!isSubScreen) {
+                            // Quick Action: Push Alerts
+                            IconButton(onClick = { currentDestination = AdminDestination.BROADCAST }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Campaign,
+                                    contentDescription = "Push Alerts",
+                                    tint = if (currentDestination == AdminDestination.BROADCAST) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
 
-                        IconButton(onClick = { viewModel.refreshAll() }) {
-                            Icon(
-                                imageVector = Icons.Filled.Refresh,
-                                contentDescription = "Refresh Data",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                            IconButton(onClick = { viewModel.refreshAll() }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Refresh,
+                                    contentDescription = "Refresh Data",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
 
-                        IconButton(onClick = { currentDestination = AdminDestination.PROFILE }) {
-                            Icon(
-                                imageVector = Icons.Filled.AccountCircle,
-                                contentDescription = "Admin Profile",
-                                tint = if (currentDestination == AdminDestination.PROFILE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            IconButton(onClick = { currentDestination = AdminDestination.PROFILE }) {
+                                Icon(
+                                    imageVector = Icons.Filled.AccountCircle,
+                                    contentDescription = "Admin Profile",
+                                    tint = if (currentDestination == AdminDestination.PROFILE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = { viewModel.refreshAll() }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Refresh,
+                                    contentDescription = "Refresh",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(

@@ -47,17 +47,17 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.6
-          name: "NINMODS Admin v1.0.6 (Zero Text-Wrapping & Chip Grid Alignment)"
+          tag_name: v1.0.7
+          name: "NINMODS Admin v1.0.7 (Unified TopBar Back Navigation & Zero Duplicate Headers)"
           body: |
-            ### NINMODS Admin Android Console v1.0.6
-            Critical UI alignment & responsive layout perfection:
+            ### NINMODS Admin Android Console v1.0.7
+            Unified navigation architecture & header refinement:
 
-            #### Key Updates in v1.0.6:
-            - **Fixed Chip Word-Wrapping**: Eliminated awkward broken multi-line words ("Inform ation", "Warnin g", "App Updat e") by upgrading priority and role selectors to a symmetrical 2x2 grid and horizontal-scroll containers.
-            - **TopBar Title Anti-Clipping**: Shortened top bar titles (e.g. "Push Alerts") ensuring clean rendering without ellipsis truncation beside action icons.
-            - **Anti-Overflow Adaptive Layout**: Guaranteed single-line chip labels with natural padding across small phones and large tablets alike.
-            - **100% Dedicated Workflows**: Maintained full-screen pages for Key Generation, User Details, Account Creation, Ticket Chat, and Broadcast Alerts.
+            #### Key Updates in v1.0.7:
+            - **Unified TopBar Back Navigation**: Sub/edit pages (`Generate Keys`, `Add User`, `User Profile`, `Ticket Thread`) dynamically replace the 3-line hamburger menu with the official Back Arrow (`ArrowBack`), providing seamless standard Android hierarchy.
+            - **Zero Duplicate Headers**: Removed all redundant internal back buttons and duplicate title rows inside sub-screens; all titles and navigation now render solely in the system `TopAppBar`.
+            - **Anti-Wrapping 2x2 Chip Grid**: Eliminated multi-line broken chip text ("Inform ation", "Warnin g") across all alert and configuration selectors.
+            - **Architecture Documentation Added**: Created comprehensive `DOCS.md` detailing the navigation doctrine, responsive grid system, and 100% backend data contract parity.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk

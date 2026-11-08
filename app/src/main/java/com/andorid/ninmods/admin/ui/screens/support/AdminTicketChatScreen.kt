@@ -66,16 +66,6 @@ fun AdminTicketChatScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(6.dp))
-
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Ticket #${ticket.id}: ${ticket.subject}",
