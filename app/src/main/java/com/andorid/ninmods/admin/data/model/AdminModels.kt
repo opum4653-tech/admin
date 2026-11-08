@@ -1,0 +1,98 @@
+package com.andorid.ninmods.admin.data.model
+
+data class AdminProfile(
+    val adminId: Int,
+    val username: String,
+    val email: String,
+    val role: String,
+    val apiKey: String
+)
+
+data class DashboardStats(
+    val totalUsers: Int = 0,
+    val totalResellers: Int = 0,
+    val totalVipResellers: Int = 0,
+    val totalUserBalance: Double = 0.0,
+    val totalKeys: Int = 0,
+    val activeKeys: Int = 0,
+    val unusedKeys: Int = 0,
+    val expiredKeys: Int = 0,
+    val bannedKeys: Int = 0,
+    val pendingDeposits: Int = 0,
+    val pendingDepositAmount: Double = 0.0,
+    val openTickets: Int = 0,
+    val totalBugReports: Int = 0
+)
+
+data class AdminUserItem(
+    val id: Int,
+    val brandId: Int,
+    val username: String,
+    val email: String,
+    val telephone: String?,
+    val role: String,
+    val balance: Double,
+    val spent: Double,
+    val currency: String,
+    val status: String,
+    val createdAt: String
+)
+
+data class AdminLicenseKeyItem(
+    val id: Int,
+    val licenseKey: String,
+    val gameType: String,
+    val durationType: String,
+    val durationHours: Int,
+    val status: String,
+    val hwid: String?,
+    val deviceModel: String?,
+    val maxDevices: Int,
+    val maxResets: Int,
+    val resetCount: Int,
+    val expiresAt: String?,
+    val notes: String?,
+    val createdAt: String?
+)
+
+data class PendingDepositItem(
+    val id: Int,
+    val userId: Int,
+    val username: String,
+    val email: String,
+    val amount: Double,
+    val currency: String,
+    val paymentMethod: String,
+    val trxId: String,
+    val proofImage: String?,
+    val status: String,
+    val adminNotes: String?,
+    val createdAt: String
+)
+
+data class GameConfigItem(
+    val id: Int,
+    val gameType: String,
+    val gamePackage: String,
+    val gameVersion: String,
+    val status: String,
+    val espEnabled: Boolean,
+    val aimbotEnabled: Boolean,
+    val noticeMessage: String?,
+    val updatedAt: String?
+)
+
+data class SubscriptionPlanItem(
+    val id: Int,
+    val planCode: String,
+    val durationType: String,
+    val title: String,
+    val description: String?,
+    val durationHours: Int,
+    val maxDevices: Int,
+    val retailPrice: Double,
+    val resellerPrice: Double,
+    val vipResellerPrice: Double,
+    val status: String,
+    val sortOrder: Int
+)

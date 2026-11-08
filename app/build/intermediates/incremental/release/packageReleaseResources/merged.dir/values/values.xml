@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="apatch_background">#121316</color>
+    <color name="apatch_error">#FFB4AB</color>
+    <color name="apatch_error_container">#93000A</color>
+    <color name="apatch_on_primary">#381E72</color>
+    <color name="apatch_outline">#44474F</color>
+    <color name="apatch_primary">#D0BCFF</color>
+    <color name="apatch_secondary">#CCC2DC</color>
+    <color name="apatch_success">#81C784</color>
+    <color name="apatch_success_container">#1B3721</color>
+    <color name="apatch_surface">#1A1C1E</color>
+    <color name="apatch_surface_variant">#24262A</color>
+    <color name="apatch_terminal_bg">#0D0E11</color>
+    <color name="apatch_text_primary">#E3E2E6</color>
+    <color name="apatch_text_secondary">#C4C6D0</color>
+    <color name="black">#FF000000</color>
+    <color name="cyber_dark">#FF0A0A0F</color>
+    <color name="cyber_purple">#FFAD47FA</color>
+    <color name="white">#FFFFFFFF</color>
+    <string name="app_name">NINMODS Admin</string>
+    <style name="Theme.NINMODSAdmin" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:statusBarColor">#0A0A0F</item>
+        <item name="android:navigationBarColor">#0A0A0F</item>
+    </style>
+</resources>
