@@ -325,4 +325,48 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
             _isLoading.value = false
         }
     }
+
+    fun sendBroadcastNotification(
+        title: String,
+        message: String,
+        type: String,
+        imageUrl: String?,
+        isPopup: Boolean,
+        targetUserId: Int?,
+        onResult: (Boolean, String) -> Unit = { _, _ -> }
+    ) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            val r = AdminApiClient.sendBroadcastNotification(key, title, message, type, imageUrl, isPopup, targetUserId)
+            if (r.isSuccess) {
+                onResult(true, r.getOrNull() ?: "Broadcast sent")
+            } else {
+                onResult(false, r.exceptionOrNull()?.message ?: "Failed to send")
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun createAdminTicket(
+        targetUserId: Int,
+        subject: String,
+        message: String,
+        priority: String,
+        onResult: (Boolean, String) -> Unit = { _, _ -> }
+    ) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            val r = AdminApiClient.createAdminTicket(key, targetUserId, subject, message, priority)
+            if (r.isSuccess) {
+                val ticketsRes = AdminApiClient.getSupportTickets(key)
+                if (ticketsRes.isSuccess) _ticketsList.value = ticketsRes.getOrNull() ?: emptyList()
+                onResult(true, r.getOrNull() ?: "Ticket created")
+            } else {
+                onResult(false, r.exceptionOrNull()?.message ?: "Failed to create ticket")
+            }
+            _isLoading.value = false
+        }
+    }
 }

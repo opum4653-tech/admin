@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -22,8 +21,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -32,11 +31,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.andorid.ninmods.admin.R
 import com.andorid.ninmods.admin.ui.AdminViewModel
+import com.andorid.ninmods.admin.ui.dialogs.BulkKeyGeneratorBottomSheet
+import com.andorid.ninmods.admin.ui.dialogs.SendNotificationBottomSheet
 import com.andorid.ninmods.admin.ui.screens.AdminProfileScreen
 import com.andorid.ninmods.admin.ui.screens.dashboard.AdminDashboardScreen
 import com.andorid.ninmods.admin.ui.screens.deposits.AdminDepositsScreen
 import com.andorid.ninmods.admin.ui.screens.keys.AdminKeysScreen
-import com.andorid.ninmods.admin.ui.screens.keys.BulkKeyGeneratorDialog
 import com.andorid.ninmods.admin.ui.screens.settings.AdminSettingsScreen
 import com.andorid.ninmods.admin.ui.screens.support.AdminSupportScreen
 import com.andorid.ninmods.admin.ui.screens.upload.AdminModUploadScreen
@@ -54,6 +54,7 @@ enum class AdminDestination(
     SUPPORT("Support Messaging", "Live Tickets & Threads", Icons.Filled.SupportAgent),
     DEPOSITS("Deposits & Wallets", "Review & Manual Credit", Icons.Filled.AccountBalanceWallet),
     UPLOAD("Mod Deployment", "Anti-Shell ZIP Upload", Icons.Filled.CloudUpload),
+    BROADCAST("Push Popups & Alerts", "In-App Dialog & Image Banner", Icons.Filled.Campaign),
     SETTINGS("Game Configurations", "FF Versions & Features", Icons.Filled.Tune),
     PROFILE("Admin Profile", "Security & Session", Icons.Filled.AccountCircle)
 }
@@ -65,7 +66,8 @@ fun MainAppScreen(
     onSignOut: () -> Unit
 ) {
     var currentDestination by remember { mutableStateOf(AdminDestination.DASHBOARD) }
-    var showBulkKeyDialog by remember { mutableStateOf(false) }
+    var showBulkKeySheet by remember { mutableStateOf(false) }
+    var showBroadcastSheet by remember { mutableStateOf(false) }
     var lastBackPressTime by remember { mutableLongStateOf(0L) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -109,7 +111,7 @@ fun MainAppScreen(
                 modifier = Modifier
                     .width(320.dp)
                     .fillMaxHeight(),
-                drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
+                drawerShape = RectangleShape, // Straight non-rounded edges strictly matching APatch official UI
                 drawerContainerColor = MaterialTheme.colorScheme.surface
             ) {
                 Column(
@@ -120,7 +122,7 @@ fun MainAppScreen(
                     // Header Card
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
+                        shape = RoundedCornerShape(16.dp),
                         color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
                         Row(
@@ -201,10 +203,15 @@ fun MainAppScreen(
                                 },
                                 selected = isSelected,
                                 onClick = {
-                                    currentDestination = destination
-                                    scope.launch { drawerState.close() }
+                                    if (destination == AdminDestination.BROADCAST) {
+                                        showBroadcastSheet = true
+                                        scope.launch { drawerState.close() }
+                                    } else {
+                                        currentDestination = destination
+                                        scope.launch { drawerState.close() }
+                                    }
                                 },
-                                shape = RoundedCornerShape(14.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 colors = NavigationDrawerItemDefaults.colors(
                                     selectedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
                                     unselectedContainerColor = Color.Transparent
@@ -286,6 +293,15 @@ fun MainAppScreen(
                         }
                     },
                     actions = {
+                        // Quick Action: Push Popups / Notification
+                        IconButton(onClick = { showBroadcastSheet = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.Campaign,
+                                contentDescription = "Push Popup Broadcast",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
                         IconButton(onClick = { viewModel.refreshAll() }) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
@@ -334,7 +350,7 @@ fun MainAppScreen(
                                 else -> AdminDestination.DASHBOARD
                             }
                         },
-                        onOpenBulkGenerate = { showBulkKeyDialog = true }
+                        onOpenBulkGenerate = { showBulkKeySheet = true }
                     )
 
                     AdminDestination.USERS -> AdminUsersScreen(
@@ -359,7 +375,7 @@ fun MainAppScreen(
                         onActionClick = { keyId, action, hours ->
                             viewModel.executeKeyAction(keyId, action, hours)
                         },
-                        onOpenBulkGenerate = { showBulkKeyDialog = true }
+                        onOpenBulkGenerate = { showBulkKeySheet = true }
                     )
 
                     AdminDestination.SUPPORT -> AdminSupportScreen(
@@ -374,6 +390,11 @@ fun MainAppScreen(
                         },
                         onUpdateTicketStatus = { ticketId, status ->
                             viewModel.updateTicketStatus(ticketId, status)
+                        },
+                        onCreateTicket = { targetUserId, subject, message, priority ->
+                            viewModel.createAdminTicket(targetUserId, subject, message, priority) { success, msg ->
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     )
 
@@ -398,6 +419,13 @@ fun MainAppScreen(
                         }
                     )
 
+                    AdminDestination.BROADCAST -> {
+                        LaunchedEffect(Unit) {
+                            showBroadcastSheet = true
+                            currentDestination = AdminDestination.DASHBOARD
+                        }
+                    }
+
                     AdminDestination.SETTINGS -> AdminSettingsScreen(
                         gameConfigs = gameConfigs,
                         plans = plans,
@@ -418,11 +446,24 @@ fun MainAppScreen(
         }
     }
 
-    if (showBulkKeyDialog) {
-        BulkKeyGeneratorDialog(
-            onDismiss = { showBulkKeyDialog = false },
+    // Bulk Key Generator Bottom Sheet (slides up from bottom)
+    if (showBulkKeySheet) {
+        BulkKeyGeneratorBottomSheet(
+            onDismiss = { showBulkKeySheet = false },
             onGenerate = { q, dh, dt, gt, md, n ->
                 viewModel.generateBulkKeys(q, dh, dt, gt, md, n)
+            }
+        )
+    }
+
+    // In-App Popup / Push Broadcast Bottom Sheet (slides up from bottom)
+    if (showBroadcastSheet) {
+        SendNotificationBottomSheet(
+            onDismiss = { showBroadcastSheet = false },
+            onSendNotification = { title, message, type, imageUrl, isPopup, targetUserId ->
+                viewModel.sendBroadcastNotification(title, message, type, imageUrl, isPopup, targetUserId) { success, msg ->
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                }
             }
         )
     }

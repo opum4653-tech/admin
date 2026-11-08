@@ -47,22 +47,28 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.2
-          name: "NINMODS Admin v1.0.2 (APatch Navigation Drawer & Full Suite Overhaul)"
+          tag_name: v1.0.3
+          name: "NINMODS Admin v1.0.3 (DriverLoader Bottom Sheets & Push Broadcast Suite)"
           body: |
-            ### NINMODS Admin Android Console v1.0.2
-            Major overhaul according to official APatch / DriverLoader specifications:
+            ### NINMODS Admin Android Console v1.0.3
+            Major overhaul adhering strictly to APatch & DriverLoader design specifications:
 
-            #### New Architecture & Features:
-            - **1:1 Loader Login Replica**: Exact visual parity with `DriverLoader` (surface with `logo_n`, `RoundedCornerShape(22.dp)`, custom `TextField` styling with `surfaceVariant`, error container, 52.dp sign-in button).
-            - **Standardized Dashboard Cards**: Uniform equal-height metric cards (`130.dp` primary, `96.dp` secondary) eliminating irregular layout dimensions. Documented in `docs/DASHBOARD_METRICS.md`.
-            - **Bottom Navigation Completely Removed**: Replaced with APatch top hamburger menu button (`Icons.Filled.Menu`).
-            - **Modal Navigation Drawer (Sidebar)**: APatch official drawer with quick navigation to all 8 operational suites.
-            - **Users Suite with 3-Dots Action Dropdown**: Ban / Unban accounts, Reset HWID, Adjust wallet balances, Change role permissions, and view complete user profiles.
-            - **License Keys Suite**: Bulk key generator, status filtering (Active, Unused, Expired, Banned), HWID resets, and time extensions.
-            - **Support Live Messaging Suite**: Full customer support ticket thread viewer with bubble chat and admin reply composer.
-            - **Deposits Suite**: Status filtering (Pending, Approved, Rejected, All), proof screenshot previewer, 1-tap Approve/Reject, and Manual Deposit credit modal.
-            - **Anti-Shell Mod Upload**: Client & server-side inspection rejecting `.sh`, `.php`, `.py`, `.exe`, etc., zip entry traversal check, PK signature validation, directly updating `downloads/external/gemini-cli.zip` and `downloads/kernel/ninmods-kernel.zip`.
+            #### Key Updates in v1.0.3:
+            - **All Center Dialogs Replaced with Bottom Sheets**: 100% of popups replaced with smooth bottom sheets sliding up from the bottom (identical to `DriverLoader` driver-load modal sheets). All housed inside dedicated `ui/dialogs/` package:
+              - `BulkKeyGeneratorBottomSheet`
+              - `KeyActionBottomSheet` (Extend validity, Reset HWID, Ban/Unban)
+              - `UserActionBottomSheet` (3-dots user actions)
+              - `UserInfoBottomSheet` (Full profile inspector)
+              - `AdjustBalanceBottomSheet` (Credit/Debit wallet funds)
+              - `ChangeRoleBottomSheet` (Role modification)
+              - `ApproveDepositBottomSheet` & `RejectDepositBottomSheet`
+              - `ManualDepositBottomSheet` (Admin manual wallet funding)
+              - `SendNotificationBottomSheet` (In-App popup & image broadcasting)
+              - `NewTicketBottomSheet` (Direct message dispatch)
+              - `EditGameConfigBottomSheet` & `ChangePasswordBottomSheet`
+            - **Real-Time Push Popups & Image Broadcasts**: Admin console can now push in-app modal popups, banners, and update notices directly to client devices with custom image URLs and priority levels.
+            - **Messaging Page Floating Action Button (FAB)**: Support screen equipped with APatch-native FAB (`Icons.Filled.Add`) at bottom-right for initiating direct messages to users.
+            - **APatch Drawer Alignment**: Side drawer edges flattened (`RectangleShape`), eliminating rounded corners to match APatch official UI rules.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk

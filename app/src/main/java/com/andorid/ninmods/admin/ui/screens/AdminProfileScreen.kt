@@ -22,6 +22,7 @@ import com.andorid.ninmods.admin.config.AdminConfig
 import com.andorid.ninmods.admin.ui.components.ApatchGreen
 import com.andorid.ninmods.admin.ui.components.ApatchRed
 import com.andorid.ninmods.admin.ui.components.StatusBadgePill
+import com.andorid.ninmods.admin.ui.dialogs.ChangePasswordBottomSheet
 
 @Composable
 fun AdminProfileScreen(
@@ -245,69 +246,11 @@ fun AdminProfileScreen(
         Spacer(modifier = Modifier.height(24.dp))
     }
 
-    // Password Update Dialog
+    // Password Update Bottom Sheet (slides up from bottom)
     if (showPasswordDialog) {
-        var oldPass by remember { mutableStateOf("") }
-        var newPass by remember { mutableStateOf("") }
-        var confirmPass by remember { mutableStateOf("") }
-
-        AlertDialog(
-            onDismissRequest = { showPasswordDialog = false },
-            shape = RoundedCornerShape(20.dp),
-            title = {
-                Text(
-                    text = "Change Password",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = oldPass,
-                        onValueChange = { oldPass = it },
-                        label = { Text("Current Password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = newPass,
-                        onValueChange = { newPass = it },
-                        label = { Text("New Password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = confirmPass,
-                        onValueChange = { confirmPass = it },
-                        label = { Text("Confirm New Password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { showPasswordDialog = false },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text("Save", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPasswordDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+        ChangePasswordBottomSheet(
+            onDismiss = { showPasswordDialog = false },
+            onConfirm = { _, _ -> showPasswordDialog = false }
         )
     }
 }

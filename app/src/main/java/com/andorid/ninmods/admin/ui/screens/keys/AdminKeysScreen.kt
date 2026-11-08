@@ -26,6 +26,7 @@ import com.andorid.ninmods.admin.ui.components.ApatchGreen
 import com.andorid.ninmods.admin.ui.components.ApatchOrange
 import com.andorid.ninmods.admin.ui.components.ApatchRed
 import com.andorid.ninmods.admin.ui.components.StatusBadgePill
+import com.andorid.ninmods.admin.ui.dialogs.KeyActionBottomSheet
 
 @Composable
 fun AdminKeysScreen(
@@ -249,112 +250,12 @@ fun AdminKeysScreen(
         }
     }
 
-    // Key Action Management Dialog
+    // Key Action Bottom Sheet (replaces center popup)
     actionDialogKey?.let { k ->
-        AlertDialog(
-            onDismissRequest = { actionDialogKey = null },
-            shape = RoundedCornerShape(20.dp),
-            title = {
-                Text(
-                    text = "Manage Key",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Text(
-                        text = k.licenseKey,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Button(
-                        onClick = {
-                            onActionClick(k.id, "reset_hwid", 0)
-                            actionDialogKey = null
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(imageVector = Icons.Filled.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Reset HWID (Hardware ID)", fontWeight = FontWeight.Bold)
-                    }
-
-                    Button(
-                        onClick = {
-                            onActionClick(k.id, "extend", 24)
-                            actionDialogKey = null
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        ),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(imageVector = Icons.Filled.MoreTime, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Extend Time (+24 Hours)", fontWeight = FontWeight.Bold)
-                    }
-
-                    Button(
-                        onClick = {
-                            onActionClick(k.id, "extend", 168)
-                            actionDialogKey = null
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        ),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(imageVector = Icons.Filled.MoreTime, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Extend Time (+7 Days)", fontWeight = FontWeight.Bold)
-                    }
-
-                    val isBanned = k.status.equals("banned", ignoreCase = true)
-                    Button(
-                        onClick = {
-                            onActionClick(k.id, if (isBanned) "unban" else "ban", 0)
-                            actionDialogKey = null
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isBanned) ApatchGreen.copy(alpha = 0.2f) else ApatchRed.copy(alpha = 0.2f),
-                            contentColor = if (isBanned) ApatchGreen else ApatchRed
-                        ),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(
-                            imageVector = if (isBanned) Icons.Filled.LockOpen else Icons.Filled.Block,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (isBanned) "Unban Key" else "Ban Key (Security Lock)", fontWeight = FontWeight.Bold)
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { actionDialogKey = null }) {
-                    Text("Close", fontWeight = FontWeight.Bold)
-                }
-            }
+        KeyActionBottomSheet(
+            keyItem = k,
+            onDismiss = { actionDialogKey = null },
+            onActionClick = onActionClick
         )
     }
 }

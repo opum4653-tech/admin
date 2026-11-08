@@ -688,4 +688,64 @@ object AdminApiClient {
             Result.failure(e)
         }
     }
+
+    suspend fun sendBroadcastNotification(
+        apiKey: String,
+        title: String,
+        message: String,
+        type: String = "info",
+        imageUrl: String? = null,
+        isPopup: Boolean = true,
+        targetUserId: Int? = null
+    ): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/broadcasts/send", "POST", apiKey)
+            val payload = JSONObject().apply {
+                put("title", title)
+                put("message", message)
+                put("type", type)
+                if (!imageUrl.isNullOrBlank()) put("image_url", imageUrl)
+                put("is_popup", if (isPopup) 1 else 0)
+                if (targetUserId != null && targetUserId > 0) put("target_user_id", targetUserId)
+            }
+            sendJson(conn, payload.toString())
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode in 200..201 && json.optBoolean("success", true)) {
+                Result.success(json.optString("message", "Popup notification broadcasted successfully"))
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to send broadcast")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createAdminTicket(
+        apiKey: String,
+        targetUserId: Int,
+        subject: String,
+        message: String,
+        priority: String = "medium"
+    ): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/support/tickets/create", "POST", apiKey)
+            val payload = JSONObject().apply {
+                put("target_user_id", targetUserId)
+                put("subject", subject)
+                put("message", message)
+                put("priority", priority)
+            }
+            sendJson(conn, payload.toString())
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode in 200..201 && json.optBoolean("success", true)) {
+                Result.success(json.optString("message", "Direct message thread dispatched"))
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to create ticket")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

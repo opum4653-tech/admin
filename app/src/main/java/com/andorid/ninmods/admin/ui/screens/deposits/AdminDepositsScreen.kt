@@ -27,6 +27,9 @@ import com.andorid.ninmods.admin.data.model.PendingDepositItem
 import com.andorid.ninmods.admin.ui.components.ApatchGreen
 import com.andorid.ninmods.admin.ui.components.ApatchRed
 import com.andorid.ninmods.admin.ui.components.StatusBadgePill
+import com.andorid.ninmods.admin.ui.dialogs.ApproveDepositBottomSheet
+import com.andorid.ninmods.admin.ui.dialogs.ManualDepositBottomSheet
+import com.andorid.ninmods.admin.ui.dialogs.RejectDepositBottomSheet
 
 @Composable
 fun AdminDepositsScreen(
@@ -279,189 +282,34 @@ fun AdminDepositsScreen(
         }
     }
 
-    // Manual Deposit Addition Dialog
+    // Manual Deposit Addition Bottom Sheet (slides up from bottom)
     if (showManualDepositDialog) {
-        var targetUserIdText by remember { mutableStateOf("") }
-        var manualAmountText by remember { mutableStateOf("") }
-        var manualMethod by remember { mutableStateOf("Admin Manual") }
-        var manualNotes by remember { mutableStateOf("Credited by SuperAdmin") }
-
-        AlertDialog(
-            onDismissRequest = { showManualDepositDialog = false },
-            shape = RoundedCornerShape(20.dp),
-            title = {
-                Text(
-                    text = "Add Manual Deposit",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = targetUserIdText,
-                        onValueChange = { targetUserIdText = it },
-                        label = { Text("Target User ID") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = manualAmountText,
-                        onValueChange = { manualAmountText = it },
-                        label = { Text("Amount (USD $)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = manualMethod,
-                        onValueChange = { manualMethod = it },
-                        label = { Text("Payment Method / Source") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = manualNotes,
-                        onValueChange = { manualNotes = it },
-                        label = { Text("Admin Reference Notes") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val uid = targetUserIdText.toIntOrNull()
-                        val amt = manualAmountText.toDoubleOrNull()
-                        if (uid != null && amt != null && amt > 0) {
-                            onAddManualDeposit(uid, amt, manualMethod, manualNotes)
-                            showManualDepositDialog = false
-                        }
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text("Add Credit", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showManualDepositDialog = false }) {
-                    Text("Cancel")
-                }
+        ManualDepositBottomSheet(
+            onDismiss = { showManualDepositDialog = false },
+            onConfirm = { uid, amt, mth, not ->
+                onAddManualDeposit(uid, amt, mth, not)
             }
         )
     }
 
-    // Approve Deposit Confirmation Dialog
+    // Approve Deposit Confirmation Bottom Sheet
     approveDialogDeposit?.let { dep ->
-        var customAmountText by remember { mutableStateOf("${dep.amount}") }
-
-        AlertDialog(
-            onDismissRequest = { approveDialogDeposit = null },
-            shape = RoundedCornerShape(20.dp),
-            title = {
-                Text(
-                    text = "Approve Deposit",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Approve and credit balance to account ${dep.username}:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    OutlinedTextField(
-                        value = customAmountText,
-                        onValueChange = { customAmountText = it },
-                        label = { Text("Confirmed Amount (${dep.currency})") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val parsed = customAmountText.toDoubleOrNull()
-                        onApprove(dep.id, parsed)
-                        approveDialogDeposit = null
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ApatchGreen)
-                ) {
-                    Text("Confirm Approve", fontWeight = FontWeight.Bold, color = Color.White)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { approveDialogDeposit = null }) {
-                    Text("Cancel")
-                }
+        ApproveDepositBottomSheet(
+            deposit = dep,
+            onDismiss = { approveDialogDeposit = null },
+            onConfirm = { id, verified ->
+                onApprove(id, verified)
             }
         )
     }
 
-    // Reject Deposit Dialog
+    // Reject Deposit Bottom Sheet
     rejectDialogDeposit?.let { dep ->
-        var reasonText by remember { mutableStateOf("Invalid Transaction ID / Payment not received") }
-
-        AlertDialog(
-            onDismissRequest = { rejectDialogDeposit = null },
-            shape = RoundedCornerShape(20.dp),
-            title = {
-                Text(
-                    text = "Reject Deposit",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Reject deposit #${dep.id} from ${dep.username}. Provide reason:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    OutlinedTextField(
-                        value = reasonText,
-                        onValueChange = { reasonText = it },
-                        label = { Text("Rejection Reason") },
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onReject(dep.id, reasonText)
-                        rejectDialogDeposit = null
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Confirm Reject", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { rejectDialogDeposit = null }) {
-                    Text("Cancel")
-                }
+        RejectDepositBottomSheet(
+            deposit = dep,
+            onDismiss = { rejectDialogDeposit = null },
+            onConfirm = { id, reason ->
+                onReject(id, reason)
             }
         )
     }

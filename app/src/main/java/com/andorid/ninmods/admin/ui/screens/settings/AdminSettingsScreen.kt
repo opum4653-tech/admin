@@ -22,6 +22,7 @@ import com.andorid.ninmods.admin.ui.components.ApatchOrange
 import com.andorid.ninmods.admin.ui.components.ApatchRed
 import com.andorid.ninmods.admin.ui.components.StatusBadgePill
 import com.andorid.ninmods.admin.ui.components.SwitchItem
+import com.andorid.ninmods.admin.ui.dialogs.EditGameConfigBottomSheet
 
 @Composable
 fun AdminSettingsScreen(
@@ -339,58 +340,12 @@ fun AdminSettingsScreen(
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    // Edit Game Config Dialog
+    // Edit Game Config Bottom Sheet (slides up from bottom)
     editingConfig?.let { cfg ->
-        var versionText by remember(cfg) { mutableStateOf(cfg.gameVersion) }
-        var noticeText by remember(cfg) { mutableStateOf(cfg.noticeMessage ?: "") }
-
-        AlertDialog(
-            onDismissRequest = { editingConfig = null },
-            shape = RoundedCornerShape(20.dp),
-            title = {
-                Text(
-                    text = "Edit Config: ${cfg.gameType.uppercase()}",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = versionText,
-                        onValueChange = { versionText = it },
-                        label = { Text("Target APK Version") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = noticeText,
-                        onValueChange = { noticeText = it },
-                        label = { Text("Broadcast Update Notice") },
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onUpdateGameConfig(cfg.id, cfg.status, versionText, cfg.espEnabled, cfg.aimbotEnabled, noticeText)
-                        editingConfig = null
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text("Save", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { editingConfig = null }) {
-                    Text("Cancel")
-                }
-            }
+        EditGameConfigBottomSheet(
+            config = cfg,
+            onDismiss = { editingConfig = null },
+            onSave = onUpdateGameConfig
         )
     }
 }
