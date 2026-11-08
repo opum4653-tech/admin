@@ -8,11 +8,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.andorid.ninmods.admin.ui.theme.*
 
 @Composable
 fun BulkKeyGeneratorDialog(
@@ -28,14 +26,12 @@ fun BulkKeyGeneratorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = CyberCardBg,
         shape = RoundedCornerShape(20.dp),
         title = {
             Text(
-                text = "BULK KEY GENERATOR",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = CyberPurple
+                text = "Generate License Keys",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
             )
         },
         text = {
@@ -48,59 +44,39 @@ fun BulkKeyGeneratorDialog(
                 OutlinedTextField(
                     value = quantityText,
                     onValueChange = { quantityText = it },
-                    label = { Text("Quantity (1 - 100)", color = TextSecondary) },
+                    label = { Text("Quantity (1 - 100)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = CyberPurple,
-                        unfocusedBorderColor = CyberBorder,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary
-                    ),
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = durationHoursText,
                     onValueChange = { durationHoursText = it },
-                    label = { Text("Duration (Hours)", color = TextSecondary) },
+                    label = { Text("Duration (Hours)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = CyberPurple,
-                        unfocusedBorderColor = CyberBorder,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary
-                    ),
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = maxDevicesText,
                     onValueChange = { maxDevicesText = it },
-                    label = { Text("Max Devices Limit", color = TextSecondary) },
+                    label = { Text("Max Devices Limit") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = CyberPurple,
-                        unfocusedBorderColor = CyberBorder,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary
-                    ),
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Internal Batch Notes", color = TextSecondary) },
+                    label = { Text("Internal Batch Notes") },
                     singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = CyberPurple,
-                        unfocusedBorderColor = CyberBorder,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary
-                    ),
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -108,19 +84,23 @@ fun BulkKeyGeneratorDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val q = quantityText.toIntOrNull() ?: 1
-                    val dh = durationHoursText.toIntOrNull() ?: 24
-                    val md = maxDevicesText.toIntOrNull() ?: 1
-                    onGenerate(q, dh, durationType, gameType, md, notes)
+                    val qty = quantityText.toIntOrNull() ?: 1
+                    val hrs = durationHoursText.toIntOrNull() ?: 24
+                    val devs = maxDevicesText.toIntOrNull() ?: 1
+                    onGenerate(qty, hrs, durationType, gameType, devs, notes)
+                    onDismiss()
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = CyberPurple)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             ) {
-                Text("GENERATE", fontWeight = FontWeight.Bold, color = Color.White)
+                Text("Generate", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("CANCEL", color = TextSecondary)
+                Text("Cancel")
             }
         }
     )

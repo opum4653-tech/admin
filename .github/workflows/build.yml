@@ -45,18 +45,18 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "NINMODS Admin v1.0.0"
+          tag_name: v1.0.1
+          name: "NINMODS Admin v1.0.1 (Official APatch UI)"
           body: |
-            ### NINMODS Admin Android Console v1.0.0
-            Official dedicated Admin Android application for infrastructure operations, telemetry, user wallet control, license key generation, and deposit verification.
+            ### NINMODS Admin Android Console v1.0.1
+            Official dedicated Admin Android application rebuilt with 100% 1:1 replica of the official APatch / DriverLoader design system and navigation architecture.
 
-            #### Capabilities:
-            - **Live Telemetry**: Real-time stats across users, balances, keys, and transaction queues.
-            - **License Key Management**: Instant HWID resets, time extension (+24h/+7d), ban/unban, and bulk key generation.
-            - **User Wallet & Roles**: Balance credit/deduct in USD, role promotion (`user`, `reseller`, `vip_reseller`).
-            - **Deposit Verification**: Pending transactions queue with payment proof review, 1-tap approve and reject.
-            - **Game Configurations**: Live engine toggle (Free Fire version, maintenance mode, ESP/Aimbot toggles).
+            #### APatch UI Features:
+            - **APatch TopAppBar**: Header with title, live refresh action, and top-right profile icon (`ic_user_profile`) linking to Admin Profile subpage.
+            - **APatch BottomNavigationBar**: Rounded pill surface (`RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)`) with official drawables (`ic_nav_home_fill` / `ic_nav_home`, `ic_nav_wrench`, `ic_nav_gear`).
+            - **APatch Screen Transitions**: 340ms horizontal slide + fade in/out for Profile and 340ms crossfade between tabs.
+            - **Elevated Status Cards**: 20.dp rounded elevated cards, side-by-side metric badges (Active Keys, Users in DB, Total Balance, Deposits Queue), and `SwitchItem` configuration controls.
+            - **Management Suite**: Clean sub-tab pills for License Keys (with HWID reset, time extensions, ban/unban), User Accounts (credit/deduct, role promotion), and Pending Deposits.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk

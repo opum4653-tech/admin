@@ -1,5 +1,6 @@
 package com.andorid.ninmods.admin.ui.screens.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,277 +14,362 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.andorid.ninmods.admin.config.AdminConfig
 import com.andorid.ninmods.admin.data.model.GameConfigItem
 import com.andorid.ninmods.admin.data.model.SubscriptionPlanItem
-import com.andorid.ninmods.admin.ui.components.AdminTopBar
-import com.andorid.ninmods.admin.ui.components.CyberCard
+import com.andorid.ninmods.admin.ui.components.ApatchGreen
+import com.andorid.ninmods.admin.ui.components.ApatchOrange
+import com.andorid.ninmods.admin.ui.components.ApatchRed
 import com.andorid.ninmods.admin.ui.components.StatusBadgePill
-import com.andorid.ninmods.admin.ui.theme.*
+import com.andorid.ninmods.admin.ui.components.SwitchItem
 
 @Composable
 fun AdminSettingsScreen(
-    adminUsername: String,
-    adminRole: String,
     gameConfigs: List<GameConfigItem>,
     plans: List<SubscriptionPlanItem>,
     isLoading: Boolean,
     onRefresh: () -> Unit,
     onUpdateGameConfig: (configId: Int, status: String, version: String, esp: Boolean, aimbot: Boolean, notice: String) -> Unit,
-    onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var editingConfig by remember { mutableStateOf<GameConfigItem?>(null) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        AdminTopBar(
-            title = "SYSTEM CONFIG & PLANS",
-            subtitle = "Game Engine & Pricing Infrastructure",
-            onRefresh = onRefresh
-        )
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Spacer(modifier = Modifier.height(4.dp))
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        // 1. Game Engine Configurations Card
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
-            // Admin Profile Card
-            CyberCard {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "SIGNED IN AS",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = CyberPurple,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = adminUsername,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = TextPrimary
-                        )
-                        Text(
-                            text = "Access Role: ${adminRole.uppercase()}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Filled.Gamepad,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "TARGET GAME CONFIGURATIONS",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
 
-                    Button(
-                        onClick = onLogout,
-                        colors = ButtonDefaults.buttonColors(containerColor = CyberRed.copy(alpha = 0.2f)),
-                        shape = RoundedCornerShape(10.dp)
+                Spacer(modifier = Modifier.height(14.dp))
+
+                if (gameConfigs.isEmpty()) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.surface
                     ) {
-                        Icon(imageVector = Icons.Filled.Logout, contentDescription = null, tint = CyberRed)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("LOGOUT", color = CyberRed, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "No game engines loaded",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(16.dp)
+                        )
                     }
-                }
-            }
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        gameConfigs.forEach { cfg ->
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                color = MaterialTheme.colorScheme.surface
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = cfg.gameName,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = "Package: ${cfg.gamePackage} • Ver: ${cfg.latestVersion}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
 
-            // Game Configurations
-            Text(
-                text = "GAME CONFIGURATIONS",
-                style = MaterialTheme.typography.labelSmall,
-                color = CyberCyan,
-                fontWeight = FontWeight.Bold
-            )
+                                        StatusBadgePill(text = cfg.status, status = cfg.status)
+                                    }
 
-            if (gameConfigs.isEmpty()) {
-                CyberCard {
-                    Text(text = "No game configurations loaded", color = TextSecondary)
-                }
-            } else {
-                gameConfigs.forEach { cfg ->
-                    CyberCard {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = cfg.gameType.uppercase(),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextPrimary
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    // SwitchItems
+                                    SwitchItem(
+                                        icon = Icons.Filled.Visibility,
+                                        title = "ESP Visuals",
+                                        summary = "Inject floating skeletal/box overlays",
+                                        checked = cfg.espStatus,
+                                        onCheckedChange = { isChecked ->
+                                            onUpdateGameConfig(cfg.id, cfg.status, cfg.latestVersion, isChecked, cfg.aimbotStatus, cfg.updateNotice ?: "")
+                                        }
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    StatusBadgePill(text = cfg.status, status = cfg.status)
-                                }
 
-                                Spacer(modifier = Modifier.height(2.dp))
-
-                                Text(
-                                    text = "Version: ${cfg.gameVersion} • Package: ${cfg.gamePackage}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondary
-                                )
-
-                                Text(
-                                    text = "ESP: ${if (cfg.espEnabled) "ENABLED" else "DISABLED"} • Aimbot: ${if (cfg.aimbotEnabled) "ENABLED" else "DISABLED"}",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = if (cfg.espEnabled && cfg.aimbotEnabled) CyberGreen else CyberOrange
-                                )
-
-                                if (!cfg.noticeMessage.isNullOrBlank()) {
-                                    Text(
-                                        text = "Notice: ${cfg.noticeMessage}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = CyberCyan
+                                    SwitchItem(
+                                        icon = Icons.Filled.GpsFixed,
+                                        title = "Aim Engine",
+                                        summary = "Enable memory touch touch injection",
+                                        checked = cfg.aimbotStatus,
+                                        onCheckedChange = { isChecked ->
+                                            onUpdateGameConfig(cfg.id, cfg.status, cfg.latestVersion, cfg.espStatus, isChecked, cfg.updateNotice ?: "")
+                                        }
                                     )
-                                }
-                            }
 
-                            IconButton(onClick = { editingConfig = cfg }) {
-                                Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit", tint = CyberPurple)
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Subscription Plans
-            Text(
-                text = "SUBSCRIPTION PLANS (${plans.size})",
-                style = MaterialTheme.typography.labelSmall,
-                color = CyberPink,
-                fontWeight = FontWeight.Bold
-            )
-
-            if (plans.isEmpty()) {
-                CyberCard {
-                    Text(text = "No subscription plans loaded", color = TextSecondary)
-                }
-            } else {
-                plans.forEach { p ->
-                    CyberCard {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = p.title,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextPrimary
+                                    SwitchItem(
+                                        icon = Icons.Filled.Build,
+                                        title = "Maintenance Mode",
+                                        summary = "Blocks mod execution during game updates",
+                                        checked = cfg.status.equals("maintenance", ignoreCase = true),
+                                        onCheckedChange = { isChecked ->
+                                            val newStatus = if (isChecked) "maintenance" else "online"
+                                            onUpdateGameConfig(cfg.id, newStatus, cfg.latestVersion, cfg.espStatus, cfg.aimbotStatus, cfg.updateNotice ?: "")
+                                        }
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    StatusBadgePill(text = "${p.durationHours}h", status = "active")
+
+                                    if (!cfg.updateNotice.isNullOrBlank()) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = "Notice: ${cfg.updateNotice}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = ApatchOrange
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    OutlinedButton(
+                                        onClick = { editingConfig = cfg },
+                                        shape = RoundedCornerShape(10.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Icon(imageVector = Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Edit Version & Broadcast Notice")
+                                    }
                                 }
-
-                                Spacer(modifier = Modifier.height(2.dp))
-
-                                Text(
-                                    text = "Code: ${p.planCode} • Devices: ${p.maxDevices} • Retail: $${p.retailPrice}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondary
-                                )
-
-                                Text(
-                                    text = "Reseller: $${p.resellerPrice} • VIP Reseller: $${p.vipResellerPrice}",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = CyberGreen
-                                )
                             }
                         }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(80.dp))
         }
+
+        // 2. Pricing & Subscription Plans Card
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Loyalty,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "SUBSCRIPTION TIERS & PRICING",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                if (plans.isEmpty()) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Text(
+                            text = "No subscription plans loaded",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        plans.forEach { plan ->
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                color = MaterialTheme.colorScheme.surface
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = plan.planName,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "Duration: ${plan.durationHours} Hours (${plan.durationType})",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    Text(
+                                        text = "\$${String.format("%.2f", plan.priceUsd)}",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = ApatchGreen
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. API & Cloud Infrastructure Card
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CloudSync,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "API & INFRASTRUCTURE",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Admin API Endpoint:",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = AdminConfig.BASE_URL,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
     }
 
     // Edit Game Config Dialog
-    editingConfig?.let { target ->
-        var versionText by remember { mutableStateOf(target.gameVersion) }
-        var statusText by remember { mutableStateOf(target.status) }
-        var espEnabled by remember { mutableStateOf(target.espEnabled) }
-        var aimbotEnabled by remember { mutableStateOf(target.aimbotEnabled) }
-        var noticeText by remember { mutableStateOf(target.noticeMessage ?: "") }
+    editingConfig?.let { cfg ->
+        var versionText by remember { mutableStateOf(cfg.latestVersion) }
+        var noticeText by remember { mutableStateOf(cfg.updateNotice ?: "") }
 
         AlertDialog(
             onDismissRequest = { editingConfig = null },
-            containerColor = CyberCardBg,
             shape = RoundedCornerShape(20.dp),
             title = {
-                Text("Edit Config: ${target.gameType.uppercase()}", color = TextPrimary, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Edit Game Config: ${cfg.gameName}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
                         value = versionText,
                         onValueChange = { versionText = it },
-                        label = { Text("Game Version (e.g. 1.132.1)", color = TextSecondary) },
+                        label = { Text("Target APK Version") },
                         singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = CyberPurple,
-                            unfocusedBorderColor = CyberBorder,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
-                        ),
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
-
-                    OutlinedTextField(
-                        value = statusText,
-                        onValueChange = { statusText = it },
-                        label = { Text("Status (active / maintenance)", color = TextSecondary) },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = CyberPurple,
-                            unfocusedBorderColor = CyberBorder,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("ESP Engine Enabled", color = TextPrimary)
-                        Switch(
-                            checked = espEnabled,
-                            onCheckedChange = { espEnabled = it },
-                            colors = SwitchDefaults.colors(checkedThumbColor = CyberGreen, checkedTrackColor = CyberGreen.copy(alpha = 0.5f))
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Aimbot Engine Enabled", color = TextPrimary)
-                        Switch(
-                            checked = aimbotEnabled,
-                            onCheckedChange = { aimbotEnabled = it },
-                            colors = SwitchDefaults.colors(checkedThumbColor = CyberPurple, checkedTrackColor = CyberPurple.copy(alpha = 0.5f))
-                        )
-                    }
 
                     OutlinedTextField(
                         value = noticeText,
                         onValueChange = { noticeText = it },
-                        label = { Text("Maintenance / Announcement Notice", color = TextSecondary) },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = CyberPurple,
-                            unfocusedBorderColor = CyberBorder,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
-                        ),
+                        label = { Text("Broadcast Update Notice") },
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -291,17 +377,18 @@ fun AdminSettingsScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        onUpdateGameConfig(target.id, statusText, versionText, espEnabled, aimbotEnabled, noticeText)
+                        onUpdateGameConfig(cfg.id, cfg.status, versionText, cfg.espStatus, cfg.aimbotStatus, noticeText)
                         editingConfig = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = CyberPurple)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("SAVE CHANGES", fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("Save", fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { editingConfig = null }) {
-                    Text("CANCEL", color = TextSecondary)
+                    Text("Cancel")
                 }
             }
         )

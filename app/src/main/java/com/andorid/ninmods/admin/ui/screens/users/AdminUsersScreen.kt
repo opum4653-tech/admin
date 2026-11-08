@@ -15,14 +15,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.andorid.ninmods.admin.R
 import com.andorid.ninmods.admin.data.model.AdminUserItem
-import com.andorid.ninmods.admin.ui.components.AdminTopBar
-import com.andorid.ninmods.admin.ui.components.CyberCard
+import com.andorid.ninmods.admin.ui.components.ApatchGreen
+import com.andorid.ninmods.admin.ui.components.ApatchOrange
 import com.andorid.ninmods.admin.ui.components.StatusBadgePill
-import com.andorid.ninmods.admin.ui.theme.*
 
 @Composable
 fun AdminUsersScreen(
@@ -55,36 +56,31 @@ fun AdminUsersScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        AdminTopBar(
-            title = "USER ACCOUNTS",
-            subtitle = "${users.size} registered accounts",
-            onRefresh = onRefresh
-        )
-
         // Search Bar
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Search by username or email...", color = TextSecondary) },
-            leadingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null, tint = CyberPurple) },
+            placeholder = { Text("Search by username or email...", style = MaterialTheme.typography.bodyMedium) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            },
             trailingIcon = {
                 if (searchQuery.isNotBlank()) {
                     IconButton(onClick = { searchQuery = "" }) {
-                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Clear", tint = TextSecondary)
+                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Clear", modifier = Modifier.size(18.dp))
                     }
                 }
             },
             singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = CyberPurple,
-                unfocusedBorderColor = CyberBorder,
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary
-            ),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 6.dp)
         )
 
         // Role Tabs
@@ -92,21 +88,21 @@ fun AdminUsersScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = 16.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             roleFilters.forEach { role ->
                 val isSelected = selectedRoleFilter == role
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (isSelected) CyberPurple else CyberSurface,
+                    shape = RoundedCornerShape(14.dp),
+                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.clickable { selectedRoleFilter = role }
                 ) {
                     Text(
                         text = role,
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isSelected) Color.White else TextSecondary,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                     )
                 }
@@ -116,11 +112,20 @@ fun AdminUsersScreen(
         // Users List
         if (isLoading && users.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = CyberPurple)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else if (filteredUsers.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "No users found", color = TextSecondary)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No user accounts match the criteria",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
             LazyColumn(
@@ -128,57 +133,78 @@ fun AdminUsersScreen(
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 90.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(filteredUsers, key = { it.id }) { u ->
-                    CyberCard {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                items(filteredUsers, key = { it.id }) { item ->
+                    ElevatedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.elevatedCardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = item.username,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        StatusBadgePill(text = item.role, status = item.role)
+                                    }
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
                                     Text(
-                                        text = u.username,
-                                        style = MaterialTheme.typography.titleMedium,
+                                        text = item.email,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Text(
+                                        text = "Balance: \$${String.format("%.2f", item.balance)}",
+                                        style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = TextPrimary
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    StatusBadgePill(text = u.role, status = if (u.role.contains("reseller")) "active" else "default")
-                                }
-
-                                Spacer(modifier = Modifier.height(2.dp))
-
-                                Text(
-                                    text = u.email,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondary
-                                )
-
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    Text(
-                                        text = "Balance: $${String.format("%.2f", u.balance)}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = CyberGreen
-                                    )
-                                    Text(
-                                        text = "Spent: $${String.format("%.2f", u.spent)}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = TextSecondary
+                                        color = ApatchGreen
                                     )
                                 }
-                            }
 
-                            Spacer(modifier = Modifier.width(8.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    IconButton(
+                                        onClick = { balanceDialogUser = item },
+                                        modifier = Modifier.size(34.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.AccountBalanceWallet,
+                                            contentDescription = "Edit Balance",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
 
-                            Row {
-                                IconButton(onClick = { balanceDialogUser = u }) {
-                                    Icon(imageVector = Icons.Filled.AccountBalanceWallet, contentDescription = "Balance", tint = CyberGreen)
-                                }
-                                IconButton(onClick = { roleDialogUser = u }) {
-                                    Icon(imageVector = Icons.Filled.ManageAccounts, contentDescription = "Role", tint = CyberPurple)
+                                    IconButton(
+                                        onClick = { roleDialogUser = item },
+                                        modifier = Modifier.size(34.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Security,
+                                            contentDescription = "Change Role",
+                                            tint = ApatchOrange,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -189,68 +215,74 @@ fun AdminUsersScreen(
     }
 
     // Balance Adjustment Dialog
-    balanceDialogUser?.let { targetUser ->
-        var action by remember { mutableStateOf("add") }
+    balanceDialogUser?.let { u ->
         var amountText by remember { mutableStateOf("") }
+        var isDeduct by remember { mutableStateOf(false) }
         var notes by remember { mutableStateOf("Admin adjustment") }
 
         AlertDialog(
             onDismissRequest = { balanceDialogUser = null },
-            containerColor = CyberCardBg,
             shape = RoundedCornerShape(20.dp),
             title = {
-                Text("Adjust Balance: ${targetUser.username}", color = TextPrimary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = "Adjust Balance: ${u.username}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Current Balance: $${String.format("%.2f", targetUser.balance)} USD", color = CyberGreen, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Current Balance: \$${String.format("%.2f", u.balance)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Button(
-                            onClick = { action = "add" },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (action == "add") CyberGreen else CyberSurface),
-                            modifier = Modifier.weight(1f)
+                            onClick = { isDeduct = false },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (!isDeduct) ApatchGreen else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (!isDeduct) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         ) {
-                            Text("ADD (+)", fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("CREDIT (+)")
                         }
+
                         Button(
-                            onClick = { action = "deduct" },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (action == "deduct") CyberRed else CyberSurface),
-                            modifier = Modifier.weight(1f)
+                            onClick = { isDeduct = true },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isDeduct) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (isDeduct) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         ) {
-                            Text("DEDUCT (-)", fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("DEDUCT (-)")
                         }
                     }
 
                     OutlinedTextField(
                         value = amountText,
                         onValueChange = { amountText = it },
-                        label = { Text("Amount ($)", color = TextSecondary) },
+                        label = { Text("Amount in USD ($)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = CyberPurple,
-                            unfocusedBorderColor = CyberBorder,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
-                        ),
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     OutlinedTextField(
                         value = notes,
                         onValueChange = { notes = it },
-                        label = { Text("Notes", color = TextSecondary) },
+                        label = { Text("Transaction Notes") },
                         singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = CyberPurple,
-                            unfocusedBorderColor = CyberBorder,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
-                        ),
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -260,57 +292,69 @@ fun AdminUsersScreen(
                     onClick = {
                         val amt = amountText.toDoubleOrNull() ?: 0.0
                         if (amt > 0) {
-                            onUpdateBalance(targetUser.id, action, amt, notes)
-                            balanceDialogUser = null
+                            onUpdateBalance(u.id, if (isDeduct) "deduct" else "add", amt, notes)
                         }
+                        balanceDialogUser = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = if (action == "add") CyberGreen else CyberRed)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("SUBMIT", fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("Apply", fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { balanceDialogUser = null }) {
-                    Text("CANCEL", color = TextSecondary)
+                    Text("Cancel")
                 }
             }
         )
     }
 
-    // Role Switcher Dialog
-    roleDialogUser?.let { targetUser ->
+    // Role Promotion Dialog
+    roleDialogUser?.let { u ->
         val availableRoles = listOf("user", "reseller", "vip_reseller")
 
         AlertDialog(
             onDismissRequest = { roleDialogUser = null },
-            containerColor = CyberCardBg,
             shape = RoundedCornerShape(20.dp),
             title = {
-                Text("Change Role: ${targetUser.username}", color = TextPrimary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = "Change Role: ${u.username}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Current Role: ${targetUser.role.uppercase()}", color = CyberPurple, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Current role: ${u.role.uppercase()}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     availableRoles.forEach { r ->
+                        val isCurrent = u.role.equals(r, ignoreCase = true)
                         Button(
                             onClick = {
-                                onChangeRole(targetUser.id, r)
+                                onChangeRole(u.id, r)
                                 roleDialogUser = null
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (targetUser.role == r) CyberPurple else CyberSurface
+                                containerColor = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (isCurrent) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                             ),
+                            shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(r.uppercase(), fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(r.uppercase(), fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { roleDialogUser = null }) {
-                    Text("CLOSE", color = TextSecondary)
+                    Text("Cancel")
                 }
             }
         )
