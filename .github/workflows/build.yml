@@ -47,28 +47,23 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.2
-          name: "NinMods Admin v1.1.2 (Modern Sidebar Profile Card, Database Parity & Stealth Engine)"
-          body: |
-            ### NinMods Admin Android Console v1.1.2
-            Modern UI Profile Card Overhaul, Direct Database Integration, Backend Masking & Stealth Engine:
+            tag_name: v1.1.3
+            name: "NinMods Admin v1.1.3 (Clean Profile Card, No Balance Pill, No Tag)"
+            body: |
+              ### NinMods Admin Android Console v1.1.3
+              Clean Sidebar Profile Card & Native Admin Console:
 
-            #### Key Updates in v1.1.2:
-            - **Modern Sidebar Profile Card & Menu Overhaul**:
-              - Top brand header "NinMods" in vibrant brand blue (`#007AFF`).
-              - Modern rounded card with diagonal purple-magenta ribbon badge (`ADMIN`).
-              - Circular avatar with pastel green background.
-              - Bold administrator username display.
-              - Vivid gradient balance pill displaying live user/admin currency balance.
-              - High-contrast gradient action button ("New Order" -> Dashboard).
-              - Matching SMMTor navigation list: Orders (Keys), Services (Users), Add Funds (Deposits), Tickets (Support), Api (Deploy), and expandable Show More options.
-              - Removed logout / sign out section from sidebar drawer.
-            - **Universal Database Parity & Nested Data Extraction**:
-              - Unwrapped response extractor in `AdminApiClient` guaranteeing all arrays (users, keys, deposits, tickets, bugs, configs, plans) are safely parsed whether wrapped or root.
-              - Complete backend stealth error handling masking all raw server exceptions, 503/500 HTML pages, and Java errors.
-              - Direct database queries from backend controllers matching unified MySQL tables.
-          draft: false
-          prerelease: false
-          files: app/build/outputs/apk/release/*.apk
+              #### Key Updates in v1.1.3:
+              - **Clean Profile Card Layout**:
+                - Removed diagonal ribbon tag (`SUPERADMIN` / `ADMIN`) from profile card.
+                - Removed balance pill (`$0.00`) from sidebar (Admin manages system without personal balance).
+                - Retained clean circular NinMods avatar and bold username.
+              - **Floating Action Button (+)**:
+                - Active across License Keys, Users & Resellers, Deposits, and Support Tickets.
+              - **Backend Stability**:
+                - Syntax and route synchronization verified.
+            draft: false
+            prerelease: false
+            files: app/build/outputs/apk/release/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
