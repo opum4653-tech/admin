@@ -73,7 +73,24 @@ object AdminApiClient {
 
         val trimmed = rawText.trim()
         if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-            return trimmed
+            try {
+                val root = JSONObject(trimmed)
+                if (root.has("data") && !root.isNull("data")) {
+                    val dataObj = root.optJSONObject("data")
+                    if (dataObj != null) {
+                        if (!dataObj.has("success") && root.has("status")) {
+                            dataObj.put("success", root.optString("status").equals("success", ignoreCase = true))
+                        }
+                        if (!dataObj.has("status") && root.has("status")) {
+                            dataObj.put("status", root.optString("status"))
+                        }
+                        return dataObj.toString()
+                    }
+                }
+                return trimmed
+            } catch (e: Exception) {
+                return trimmed
+            }
         }
 
         // Response is NOT a JSON object (e.g. HTML error page, 503, 502, 500, 404, etc.)
@@ -105,18 +122,26 @@ object AdminApiClient {
             sendJson(conn, payload.toString())
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                Result.success(
-                    AdminProfile(
-                        adminId = json.optInt("admin_id"),
-                        username = json.optString("username"),
-                        email = json.optString("email"),
-                        role = json.optString("role", "admin"),
-                        apiKey = json.optString("api_key")
+            val isSuccess = (conn.responseCode in 200..299) && (json.optBoolean("success", true) || json.optString("status") == "success")
+            if (isSuccess) {
+                val target = json.optJSONObject("data") ?: json
+                val key = target.optString("api_key").ifBlank { json.optString("api_key") }
+                if (key.isBlank()) {
+                    Result.failure(Exception("Admin session key missing from response"))
+                } else {
+                    Result.success(
+                        AdminProfile(
+                            adminId = if (target.has("admin_id")) target.optInt("admin_id") else json.optInt("admin_id"),
+                            username = target.optString("username").ifBlank { json.optString("username") },
+                            email = target.optString("email").ifBlank { json.optString("email") },
+                            role = target.optString("role", "admin").ifBlank { json.optString("role", "admin") },
+                            apiKey = key
+                        )
                     )
-                )
+                }
             } else {
-                Result.failure(Exception(json.optString("error", "Admin login failed")))
+                val errMsg = json.optString("error").ifBlank { json.optString("message", "Admin login failed") }
+                Result.failure(Exception(errMsg))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -171,8 +196,9 @@ object AdminApiClient {
             val conn = openConnection("/keys$q", "GET", apiKey)
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                val array = json.optJSONArray("keys") ?: JSONArray()
+            if (conn.responseCode == 200 && (json.optBoolean("success", true) || json.optString("status") == "success")) {
+                val target = json.optJSONObject("data") ?: json
+                val array = target.optJSONArray("keys") ?: json.optJSONArray("keys") ?: JSONArray()
                 val list = mutableListOf<AdminLicenseKeyItem>()
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)
@@ -272,8 +298,9 @@ object AdminApiClient {
             val conn = openConnection("/users$q", "GET", apiKey)
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                val array = json.optJSONArray("users") ?: JSONArray()
+            if (conn.responseCode == 200 && (json.optBoolean("success", true) || json.optString("status") == "success")) {
+                val target = json.optJSONObject("data") ?: json
+                val array = target.optJSONArray("users") ?: json.optJSONArray("users") ?: JSONArray()
                 val list = mutableListOf<AdminUserItem>()
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)
@@ -377,8 +404,9 @@ object AdminApiClient {
             val conn = openConnection("/deposits/pending", "GET", apiKey)
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                val array = json.optJSONArray("pending_deposits") ?: JSONArray()
+            if (conn.responseCode == 200 && (json.optBoolean("success", true) || json.optString("status") == "success")) {
+                val target = json.optJSONObject("data") ?: json
+                val array = target.optJSONArray("pending_deposits") ?: target.optJSONArray("deposits") ?: json.optJSONArray("pending_deposits") ?: JSONArray()
                 val list = mutableListOf<PendingDepositItem>()
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)
@@ -451,8 +479,9 @@ object AdminApiClient {
             val conn = openConnection("/game-configs", "GET", apiKey)
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                val array = json.optJSONArray("game_configs") ?: JSONArray()
+            val target = json.optJSONObject("data") ?: json
+            if (conn.responseCode == 200 && (json.optBoolean("success", true) || target.optBoolean("success", true))) {
+                val array = target.optJSONArray("game_configs") ?: json.optJSONArray("game_configs") ?: JSONArray()
                 val list = mutableListOf<GameConfigItem>()
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)
@@ -515,8 +544,9 @@ object AdminApiClient {
             val conn = openConnection("/plans", "GET", apiKey)
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                val array = json.optJSONArray("plans") ?: JSONArray()
+            val target = json.optJSONObject("data") ?: json
+            if (conn.responseCode == 200 && (json.optBoolean("success", true) || target.optBoolean("success", true))) {
+                val array = target.optJSONArray("plans") ?: json.optJSONArray("plans") ?: JSONArray()
                 val list = mutableListOf<SubscriptionPlanItem>()
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)
@@ -572,8 +602,9 @@ object AdminApiClient {
             val conn = openConnection("/deposits/all$q", "GET", apiKey)
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                val array = json.optJSONArray("deposits") ?: JSONArray()
+            val target = json.optJSONObject("data") ?: json
+            if (conn.responseCode == 200 && (json.optBoolean("success", true) || target.optBoolean("success", true))) {
+                val array = target.optJSONArray("deposits") ?: json.optJSONArray("deposits") ?: JSONArray()
                 val list = mutableListOf<PendingDepositItem>()
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)
@@ -637,8 +668,9 @@ object AdminApiClient {
             val conn = openConnection("/support/tickets$q", "GET", apiKey)
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                val array = json.optJSONArray("tickets") ?: JSONArray()
+            if (conn.responseCode == 200 && (json.optBoolean("success", true) || json.optString("status") == "success")) {
+                val target = json.optJSONObject("data") ?: json
+                val array = target.optJSONArray("tickets") ?: json.optJSONArray("tickets") ?: JSONArray()
                 val list = mutableListOf<AdminTicketItem>()
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)
@@ -671,8 +703,9 @@ object AdminApiClient {
             val conn = openConnection("/support/tickets/$ticketId", "GET", apiKey)
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                val array = json.optJSONArray("replies") ?: JSONArray()
+            val target = json.optJSONObject("data") ?: json
+            if (conn.responseCode == 200 && (json.optBoolean("success", true) || target.optBoolean("success", true))) {
+                val array = target.optJSONArray("replies") ?: json.optJSONArray("replies") ?: JSONArray()
                 val list = mutableListOf<AdminTicketReplyItem>()
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)
@@ -838,8 +871,9 @@ object AdminApiClient {
             val conn = openConnection("/bugs", "GET", apiKey)
             val resText = readResponse(conn)
             val json = JSONObject(resText)
-            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
-                val array = json.optJSONArray("bugs") ?: JSONArray()
+            if (conn.responseCode == 200 && (json.optBoolean("success", true) || json.optString("status") == "success")) {
+                val target = json.optJSONObject("data") ?: json
+                val array = target.optJSONArray("bugs") ?: json.optJSONArray("bugs") ?: JSONArray()
                 val list = mutableListOf<AdminBugItem>()
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)

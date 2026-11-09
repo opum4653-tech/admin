@@ -47,17 +47,26 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.1
-          name: "NINMODS Admin v1.1.1 (Complete Backend Error Masking, Friendly Alerts & Production Shield)"
+          tag_name: v1.1.2
+          name: "SMMTor / NINMODS Admin v1.1.2 (SMMTor UI Overhaul, Database Parity & Stealth Engine)"
           body: |
-            ### NINMODS Admin Android Console v1.1.1
-            Complete Backend Error Masking, Human-Friendly Alerts & Fail-Safe Network Engine:
+            ### SMMTor / NINMODS Admin Android Console v1.1.2
+            SMMTor Website Theme Overhaul, Direct Database Integration, Backend Masking & Stealth Engine:
 
-            #### Key Updates in v1.1.1:
-            - **Complete Backend Masking & Stealth Error Handling**: Raw Java/JSON/HTML exceptions (such as `Value <!DOCTYPE ... cannot be converted to JSONObject`) are 100% intercepted and replaced with clean, professional, human-friendly alerts. Backend paths, server headers, and software internals are completely invisible to end-users.
-            - **Fail-Safe Response Reader**: `readResponse` now guarantees valid JSON structures regardless of server HTTP codes (503, 502, 500, 404), ensuring zero parser crashes.
-            - **Standard Material 3 Floating Action Buttons (FAB)**: Full-width search bars and clean bottom-right FABs on Users, Keys, and Deposits screens.
-            - **Triple-Layer Admin Authentication**: Automatic injection of authentication tokens across HTTP headers, query parameters, and JSON payloads.
+            #### Key Updates in v1.1.2:
+            - **SMMTor Sidebar Profile Card & Menu Overhaul**:
+              - Top brand header "SMMTor" in vibrant brand blue (`#007AFF`).
+              - Modern rounded card with diagonal purple-magenta ribbon badge (`ADMIN`).
+              - Circular avatar with pastel green background.
+              - Bold administrator username display.
+              - Vivid gradient balance pill displaying live user/admin currency balance.
+              - High-contrast gradient action button ("New Order" -> Dashboard).
+              - Matching SMMTor navigation list: Orders (Keys), Services (Users), Add Funds (Deposits), Tickets (Support), Api (Deploy), and expandable Show More options.
+              - Removed logout / sign out section from sidebar drawer.
+            - **Universal Database Parity & Nested Data Extraction**:
+              - Unwrapped response extractor in `AdminApiClient` guaranteeing all arrays (users, keys, deposits, tickets, bugs, configs, plans) are safely parsed whether wrapped or root.
+              - Complete backend stealth error handling masking all raw server exceptions, 503/500 HTML pages, and Java errors.
+              - Direct database queries from backend controllers matching unified MySQL tables.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk

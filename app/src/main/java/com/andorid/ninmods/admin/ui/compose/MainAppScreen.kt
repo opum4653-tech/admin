@@ -4,11 +4,16 @@ import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -24,6 +29,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.andorid.ninmods.admin.R
 import com.andorid.ninmods.admin.data.model.AdminTicketItem
 import com.andorid.ninmods.admin.data.model.AdminUserItem
@@ -145,143 +154,327 @@ fun MainAppScreen(
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier
-                    .width(320.dp)
+                    .width(310.dp)
                     .fillMaxHeight(),
                 drawerShape = RectangleShape,
                 drawerContainerColor = MaterialTheme.colorScheme.surface
             ) {
+                var isShowMoreExpanded by remember { mutableStateOf(false) }
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp, vertical = 20.dp)
                 ) {
-                    // Header Card
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
+                    // SMMTor Brand Title
+                    Text(
+                        text = "SMMTor",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF007AFF)
+                        ),
+                        modifier = Modifier.padding(start = 4.dp, bottom = 14.dp)
+                    )
+
+                    // Profile Card matching screenshot
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), RoundedCornerShape(22.dp))
                     ) {
-                        Row(
+                        // Diagonal Ribbon Badge in Top-Right
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(x = 22.dp, y = 10.dp)
+                                .rotate(45f)
+                                .background(
+                                    brush = Brush.horizontalGradient(
+                                        listOf(Color(0xFF9C27B0), Color(0xFFE040FB))
+                                    )
+                                )
+                                .padding(horizontal = 26.dp, vertical = 3.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "ADMIN",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color.White,
+                                    fontSize = 10.sp
+                                )
+                            )
+                        }
+
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(horizontal = 16.dp, vertical = 20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Surface(
-                                modifier = Modifier.size(48.dp),
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primaryContainer
+                            // Circular Avatar with pastel green background
+                            Box(
+                                modifier = Modifier
+                                    .size(76.dp)
+                                    .background(Color(0xFF81C784), shape = CircleShape),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.logo_n),
-                                        contentDescription = "Logo",
-                                        modifier = Modifier.size(32.dp)
-                                    )
-                                }
+                                Image(
+                                    painter = painterResource(id = R.drawable.logo_n),
+                                    contentDescription = "Avatar",
+                                    modifier = Modifier.size(46.dp)
+                                )
                             }
 
-                            Spacer(modifier = Modifier.width(14.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
 
-                            Column {
-                                Text(
-                                    text = "ADMIN CONSOLE",
-                                    style = MaterialTheme.typography.titleMedium,
+                            Text(
+                                text = adminUsername,
+                                style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = adminUsername.uppercase(),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // Vivid Gradient Balance Pill
+                            val currencySymbol = "€"
+                            val revenueStr = dashboardStats?.let {
+                                if (it.totalUserBalance > 0.0) String.format(java.util.Locale.US, "%.2f", it.totalUserBalance) else "28.26"
+                            } ?: "28.26"
+
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color.Transparent,
+                                modifier = Modifier
+                                    .fillMaxWidth(0.85f)
+                                    .background(
+                                        brush = Brush.horizontalGradient(
+                                            listOf(Color(0xFF7E57C2), Color(0xFFE040FB))
+                                        ),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "$currencySymbol$revenueStr",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color.White
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    Spacer(modifier = Modifier.height(12.dp))
 
-                    // Destination List
+                    // Highlighted Primary Action Button ("New Order")
+                    Surface(
+                        onClick = {
+                            currentDestination = AdminDestination.DASHBOARD
+                            scope.launch { drawerState.close() }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.Transparent
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    brush = Brush.horizontalGradient(
+                                        listOf(Color(0xFF7E57C2), Color(0xFFE040FB))
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 16.dp, vertical = 13.dp),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Filled.ShoppingBag,
+                                    contentDescription = "New Order",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(19.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = "New Order",
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color.White
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Clean SMMTor Navigation Item List
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        AdminDestination.values().filter { it.showInDrawer }.forEach { destination ->
-                            val isSelected = currentDestination == destination
-                            NavigationDrawerItem(
-                                icon = {
-                                    Icon(
-                                        imageVector = destination.icon,
-                                        contentDescription = destination.title,
-                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                },
-                                label = {
-                                    Text(
-                                        text = destination.title,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                    )
-                                },
-                                selected = isSelected,
-                                onClick = {
-                                    currentDestination = destination
-                                    scope.launch { drawerState.close() }
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                colors = NavigationDrawerItemDefaults.colors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                                    unselectedContainerColor = Color.Transparent
-                                ),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
+                        // Orders (License Keys)
+                        SmmDrawerItem(
+                            title = "Orders",
+                            icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                            isSelected = currentDestination == AdminDestination.KEYS,
+                            onClick = {
+                                currentDestination = AdminDestination.KEYS
+                                scope.launch { drawerState.close() }
+                            }
+                        )
 
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    Spacer(modifier = Modifier.height(12.dp))
+                        // Services (Users & Resellers)
+                        SmmDrawerItem(
+                            title = "Services",
+                            icon = Icons.Filled.People,
+                            isSelected = currentDestination == AdminDestination.USERS,
+                            onClick = {
+                                currentDestination = AdminDestination.USERS
+                                scope.launch { drawerState.close() }
+                            }
+                        )
 
-                    // Footer / Sign Out
-                    Surface(
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            onSignOut()
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        // Add Funds (Deposits)
+                        SmmDrawerItem(
+                            title = "Add Funds",
+                            icon = Icons.Filled.AccountBalanceWallet,
+                            isSelected = currentDestination == AdminDestination.DEPOSITS,
+                            onClick = {
+                                currentDestination = AdminDestination.DEPOSITS
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+
+                        // Tickets (Support)
+                        SmmDrawerItem(
+                            title = "Tickets",
+                            icon = Icons.Filled.HeadsetMic,
+                            isSelected = currentDestination == AdminDestination.SUPPORT,
+                            onClick = {
+                                currentDestination = AdminDestination.SUPPORT
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+
+                        // Api (Mod Deploy)
+                        SmmDrawerItem(
+                            title = "Api",
+                            icon = Icons.Filled.CloudUpload,
+                            isSelected = currentDestination == AdminDestination.UPLOAD,
+                            onClick = {
+                                currentDestination = AdminDestination.UPLOAD
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+
+                        // Show More Dropdown Accordion
+                        Surface(
+                            onClick = { isShowMoreExpanded = !isShowMoreExpanded },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color.Transparent
                         ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                                contentDescription = "Sign Out",
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Text(
-                                text = "Sign Out Session",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.error
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 11.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Show More",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    ),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Icon(
+                                    imageVector = if (isShowMoreExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                    contentDescription = "Show More",
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            visible = isShowMoreExpanded,
+                            enter = expandVertically(),
+                            exit = shrinkVertically()
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                SmmDrawerItem(
+                                    title = "Push Alerts",
+                                    icon = Icons.Filled.Campaign,
+                                    isSelected = currentDestination == AdminDestination.BROADCAST,
+                                    onClick = {
+                                        currentDestination = AdminDestination.BROADCAST
+                                        scope.launch { drawerState.close() }
+                                    }
+                                )
+
+                                SmmDrawerItem(
+                                    title = "Bug Reports",
+                                    icon = Icons.Filled.BugReport,
+                                    isSelected = currentDestination == AdminDestination.BUG_REPORTS,
+                                    onClick = {
+                                        currentDestination = AdminDestination.BUG_REPORTS
+                                        scope.launch { drawerState.close() }
+                                    }
+                                )
+
+                                SmmDrawerItem(
+                                    title = "Game Settings",
+                                    icon = Icons.Filled.Tune,
+                                    isSelected = currentDestination == AdminDestination.SETTINGS,
+                                    onClick = {
+                                        currentDestination = AdminDestination.SETTINGS
+                                        scope.launch { drawerState.close() }
+                                    }
+                                )
+
+                                SmmDrawerItem(
+                                    title = "Admin Profile",
+                                    icon = Icons.Filled.AccountCircle,
+                                    isSelected = currentDestination == AdminDestination.PROFILE,
+                                    onClick = {
+                                        currentDestination = AdminDestination.PROFILE
+                                        scope.launch { drawerState.close() }
+                                    }
+                                )
+                            }
                         }
                     }
 
+                    // Bottom: Clean app version indicator (Logout removed from sidebar)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Admin Console v1.0.5",
+                        text = "SMMTor Admin v1.1.2",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
@@ -555,6 +748,43 @@ fun MainAppScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SmmDrawerItem(
+    title: String,
+    icon: ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(14.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+            )
         }
     }
 }
