@@ -47,18 +47,17 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.9
-          name: "NINMODS Admin v1.0.9 (Enterprise SQL Schema, Client Bug Reporting & Anti-Wrap Layouts)"
+          tag_name: v1.1.0
+          name: "NINMODS Admin v1.1.0 (Standard M3 FAB Overhaul, Full-Width Search & Unbreakable Admin Auth)"
           body: |
-            ### NINMODS Admin Android Console v1.0.9
-            Enterprise Database Architecture, Diagnostic Telemetry & Dynamic Navigation:
+            ### NINMODS Admin Android Console v1.1.0
+            Standard Material 3 FAB Overhaul, Full-Width Search & Fail-Safe Admin Auth:
 
-            #### Key Updates in v1.0.9:
-            - **Enterprise SQL Schema Alignment**: Fully matched with business-class `database.sql` supporting unified `users`, `admins`, `license_keys`, `deposits`, `tickets`, `bug_reports`, and `broadcasts`.
-            - **Dynamic Sub-Screen TopBar Navigation**: Replaced the 3-line hamburger menu with a Back button (`ArrowBack`) on all edit and detail screens (`Generate Keys`, `Add User`, `User Profile`, `Ticket Chat`, `Bug Reports`). Eliminated all duplicate internal back arrows and redundant header cards.
-            - **Anti-Wrapping Adaptive Layouts**: Converted Priority Level chips in Push Alerts and Duration presets into horizontal scroll rows with `maxLines = 1` and `softWrap = false`, preventing awkward multi-line syllable breaks ("Warnin/g", "App/Updat/e").
-            - **Client Bug Reports Inspection Screen**: Added dedicated screen to inspect diagnostic crash traces and telemetry submitted from the client loader app with instant status resolution.
-            - **Loader In-App Popups & Banners Integration**: Synchronized broadcast announcements so broadcasts created in the admin panel are immediately presented as modal alerts and banner cards in the loader app.
+            #### Key Updates in v1.1.0:
+            - **Standard Material 3 Floating Action Buttons (FAB)**: Moved "Add User", "Generate Keys", and "Add Manual Deposit" from the top search row down to standard bottom-right Floating Action Buttons, matching the Support screen style perfectly.
+            - **Spacious Full-Width Search & Filter Layouts**: Eliminated search bar squeezing and layout clipping on Users, Keys, and Deposits screens.
+            - **Unbreakable Admin Auth Routing**: Resolved "Admin authentication key required" error by injecting authentication tokens via HTTP Headers, URL Query parameters, and JSON payloads simultaneously, ensuring resilience against reverse proxy header-stripping.
+            - **Unified Database & Backend Parity**: Full synchronization with all 16 business-class tables in `database.sql`.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk
