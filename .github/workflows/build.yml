@@ -47,24 +47,22 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-            tag_name: v1.1.6
-            name: "NinMods Admin v1.1.6 (Real Dashboard Report Graphs & Searchable User Dropdowns)"
+            tag_name: v1.1.7
+            name: "NinMods Admin v1.1.7 (User Keys Management & Hardware Binding Control)"
             body: |
-              ### NinMods Admin Android Console v1.1.6
-              Real Dashboard Report Graphs & Searchable User Dropdowns:
+              ### NinMods Admin Android Console v1.1.7
+              User Keys Inventory & Hardware Binding Telemetry:
 
-              #### Key Updates in v1.1.6:
-              - **Real Dashboard Visual Report Graphs**:
-                - Interactive Key Inventory Health distribution chart (Active, Unused, Expired, Banned) with real proportional segments and live percentage chips.
-                - Financial & Settlement Ledger telemetry card comparing circulating wallet funds with pending deposit backlog.
-                - User Ecosystem Distribution card showing real-time proportions of standard users, resellers, and VIP accounts.
-              - **Searchable User Dropdown System**:
-                - Manual Deposit bottom sheet now features searchable user dropdown selector with username/email/ID filtering, live wallet balance, and 1-tap selection (zero manual ID typing).
-                - Push Alert bottom sheet user targeting now features full searchable user selector when targeting individual clients.
-              - **Drawer & UI Consistency**:
-                - Clean header card without redundant balance pill or corner ribbons.
-                - Default destination set to Dashboard immediately upon login.
-                - Supports both wrapped and unwrapped JSON structures.
+              #### Key Updates in v1.1.7:
+              - **Account VIP Keys Telemetry**:
+                - Directly displays all active and unused VIP license keys assigned to the specific user profile.
+                - 1-tap clipboard copy button and real-time validity metrics.
+              - **Hardware Device & HWID Reset Control**:
+                - Displays bound client hardware model and raw HWID string.
+                - 1-tap "Reset HWID" button to instantly unbind devices without leaving the user profile.
+              - **Full Server & Database Synchronization**:
+                - Verified end-to-end against production database and REST endpoints.
+                - Completely replaces legacy manual ID typing with intelligent searchable selectors across all admin dialogs.
             draft: false
             prerelease: false
             files: app/build/outputs/apk/release/*.apk

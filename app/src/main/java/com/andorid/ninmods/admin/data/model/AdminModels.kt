@@ -40,6 +40,7 @@ data class AdminUserItem(
 
 data class AdminLicenseKeyItem(
     val id: Int,
+    val userId: Int? = null,
     val licenseKey: String,
     val gameType: String,
     val durationType: String,

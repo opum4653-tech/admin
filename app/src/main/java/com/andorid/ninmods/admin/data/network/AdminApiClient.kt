@@ -205,6 +205,7 @@ object AdminApiClient {
                     list.add(
                         AdminLicenseKeyItem(
                             id = item.optInt("id"),
+                            userId = if (item.has("user_id") && !item.isNull("user_id")) item.optInt("user_id") else null,
                             licenseKey = item.optString("license_key"),
                             gameType = item.optString("game_type", "all"),
                             durationType = item.optString("duration_type", "custom"),

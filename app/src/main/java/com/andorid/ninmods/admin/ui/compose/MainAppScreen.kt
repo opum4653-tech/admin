@@ -503,8 +503,13 @@ fun MainAppScreen(
                         AdminDestination.USER_DETAIL -> {
                             val user = selectedUserDetail
                             if (user != null) {
+                                val userAssignedKeys = keysList.filter { it.userId == user.id }
                                 AdminUserDetailScreen(
                                     user = user,
+                                    userKeys = userAssignedKeys,
+                                    onResetKeyHwid = { keyId ->
+                                        viewModel.executeKeyAction(keyId, "reset_hwid", 0)
+                                    },
                                     onNavigateBack = { currentDestination = AdminDestination.USERS },
                                     onUpdateBalance = { uId, act, amt, n ->
                                         viewModel.updateUserBalance(uId, act, amt, n)
