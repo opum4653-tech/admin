@@ -159,24 +159,22 @@ fun MainAppScreen(
                 drawerShape = RectangleShape,
                 drawerContainerColor = MaterialTheme.colorScheme.surface
             ) {
-                var isShowMoreExpanded by remember { mutableStateOf(false) }
-
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp, vertical = 20.dp)
                 ) {
-                    // Brand Title
+                    // NinMods Official Brand Header
                     Text(
                         text = "NinMods",
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF007AFF)
+                            color = MaterialTheme.colorScheme.primary
                         ),
                         modifier = Modifier.padding(start = 4.dp, bottom = 14.dp)
                     )
 
-                    // Profile Card matching screenshot
+                    // Native NinMods Profile Card
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -190,19 +188,15 @@ fun MainAppScreen(
                                 .align(Alignment.TopEnd)
                                 .offset(x = 22.dp, y = 10.dp)
                                 .rotate(45f)
-                                .background(
-                                    brush = Brush.horizontalGradient(
-                                        listOf(Color(0xFF9C27B0), Color(0xFFE040FB))
-                                    )
-                                )
+                                .background(MaterialTheme.colorScheme.primary)
                                 .padding(horizontal = 26.dp, vertical = 3.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "ADMIN",
+                                text = adminRole.uppercase(),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     fontSize = 10.sp
                                 )
                             )
@@ -214,16 +208,16 @@ fun MainAppScreen(
                                 .padding(horizontal = 16.dp, vertical = 20.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // Circular Avatar with pastel green background
+                            // Circular Avatar with NinMods primaryContainer
                             Box(
                                 modifier = Modifier
                                     .size(76.dp)
-                                    .background(Color(0xFF81C784), shape = CircleShape),
+                                    .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Image(
                                     painter = painterResource(id = R.drawable.logo_n),
-                                    contentDescription = "Avatar",
+                                    contentDescription = "NinMods Avatar",
                                     modifier = Modifier.size(46.dp)
                                 )
                             }
@@ -242,23 +236,15 @@ fun MainAppScreen(
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            // Vivid Gradient Balance Pill
-                            val currencySymbol = "€"
-                            val revenueStr = dashboardStats?.let {
-                                if (it.totalUserBalance > 0.0) String.format(java.util.Locale.US, "%.2f", it.totalUserBalance) else "28.26"
-                            } ?: "28.26"
+                            // Balance Pill in NinMods PrimaryContainer
+                            val balanceStr = dashboardStats?.let {
+                                String.format(java.util.Locale.US, "%.2f", it.totalUserBalance)
+                            } ?: "0.00"
 
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = Color.Transparent,
-                                modifier = Modifier
-                                    .fillMaxWidth(0.85f)
-                                    .background(
-                                        brush = Brush.horizontalGradient(
-                                            listOf(Color(0xFF7E57C2), Color(0xFFE040FB))
-                                        ),
-                                        shape = RoundedCornerShape(12.dp)
-                                    )
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                modifier = Modifier.fillMaxWidth(0.85f)
                             ) {
                                 Box(
                                     modifier = Modifier
@@ -267,10 +253,10 @@ fun MainAppScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "$currencySymbol$revenueStr",
+                                        text = "$$balanceStr",
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             fontWeight = FontWeight.ExtraBold,
-                                            color = Color.White
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
                                     )
                                 }
@@ -280,7 +266,7 @@ fun MainAppScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Highlighted Primary Action Button ("New Order")
+                    // Primary Action Button (Dashboard)
                     Surface(
                         onClick = {
                             currentDestination = AdminDestination.DASHBOARD
@@ -288,52 +274,47 @@ fun MainAppScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        color = Color.Transparent
+                        color = if (currentDestination == AdminDestination.DASHBOARD) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                        }
                     ) {
-                        Box(
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(
-                                    brush = Brush.horizontalGradient(
-                                        listOf(Color(0xFF7E57C2), Color(0xFFE040FB))
-                                    ),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
                                 .padding(horizontal = 16.dp, vertical = 13.dp),
-                            contentAlignment = Alignment.CenterStart
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Filled.ShoppingBag,
-                                    contentDescription = "New Order",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(19.dp)
+                            Icon(
+                                imageVector = Icons.Filled.Dashboard,
+                                contentDescription = "Dashboard",
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Dashboard",
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimary
                                 )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = "New Order",
-                                    style = MaterialTheme.typography.titleSmall.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = Color.White
-                                    )
-                                )
-                            }
+                            )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Clean SMMTor Navigation Item List
+                    // Authentic Admin Features Navigation List
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        // Orders (License Keys)
-                        SmmDrawerItem(
-                            title = "Orders",
-                            icon = Icons.Filled.Receipt,
+                        AdminDrawerItem(
+                            title = "License Keys",
+                            icon = Icons.Filled.VpnKey,
                             isSelected = currentDestination == AdminDestination.KEYS,
                             onClick = {
                                 currentDestination = AdminDestination.KEYS
@@ -341,9 +322,8 @@ fun MainAppScreen(
                             }
                         )
 
-                        // Services (Users & Resellers)
-                        SmmDrawerItem(
-                            title = "Services",
+                        AdminDrawerItem(
+                            title = "Users & Resellers",
                             icon = Icons.Filled.People,
                             isSelected = currentDestination == AdminDestination.USERS,
                             onClick = {
@@ -352,9 +332,8 @@ fun MainAppScreen(
                             }
                         )
 
-                        // Add Funds (Deposits)
-                        SmmDrawerItem(
-                            title = "Add Funds",
+                        AdminDrawerItem(
+                            title = "Deposits",
                             icon = Icons.Filled.AccountBalanceWallet,
                             isSelected = currentDestination == AdminDestination.DEPOSITS,
                             onClick = {
@@ -363,10 +342,9 @@ fun MainAppScreen(
                             }
                         )
 
-                        // Tickets (Support)
-                        SmmDrawerItem(
-                            title = "Tickets",
-                            icon = Icons.Filled.HeadsetMic,
+                        AdminDrawerItem(
+                            title = "Support Tickets",
+                            icon = Icons.Filled.SupportAgent,
                             isSelected = currentDestination == AdminDestination.SUPPORT,
                             onClick = {
                                 currentDestination = AdminDestination.SUPPORT
@@ -374,9 +352,8 @@ fun MainAppScreen(
                             }
                         )
 
-                        // Api (Mod Deploy)
-                        SmmDrawerItem(
-                            title = "Api",
+                        AdminDrawerItem(
+                            title = "Deploy Mod",
                             icon = Icons.Filled.CloudUpload,
                             isSelected = currentDestination == AdminDestination.UPLOAD,
                             onClick = {
@@ -385,88 +362,45 @@ fun MainAppScreen(
                             }
                         )
 
-                        // Show More Dropdown Accordion
-                        Surface(
-                            onClick = { isShowMoreExpanded = !isShowMoreExpanded },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp),
-                            color = Color.Transparent
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 14.dp, vertical = 11.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Show More",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    ),
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Icon(
-                                    imageVector = if (isShowMoreExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                                    contentDescription = "Show More",
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(20.dp)
-                                )
+                        AdminDrawerItem(
+                            title = "Push Alerts",
+                            icon = Icons.Filled.Campaign,
+                            isSelected = currentDestination == AdminDestination.BROADCAST,
+                            onClick = {
+                                currentDestination = AdminDestination.BROADCAST
+                                scope.launch { drawerState.close() }
                             }
-                        }
+                        )
 
-                        AnimatedVisibility(
-                            visible = isShowMoreExpanded,
-                            enter = expandVertically(),
-                            exit = shrinkVertically()
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 8.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                SmmDrawerItem(
-                                    title = "Push Alerts",
-                                    icon = Icons.Filled.Campaign,
-                                    isSelected = currentDestination == AdminDestination.BROADCAST,
-                                    onClick = {
-                                        currentDestination = AdminDestination.BROADCAST
-                                        scope.launch { drawerState.close() }
-                                    }
-                                )
-
-                                SmmDrawerItem(
-                                    title = "Bug Reports",
-                                    icon = Icons.Filled.BugReport,
-                                    isSelected = currentDestination == AdminDestination.BUG_REPORTS,
-                                    onClick = {
-                                        currentDestination = AdminDestination.BUG_REPORTS
-                                        scope.launch { drawerState.close() }
-                                    }
-                                )
-
-                                SmmDrawerItem(
-                                    title = "Game Settings",
-                                    icon = Icons.Filled.Tune,
-                                    isSelected = currentDestination == AdminDestination.SETTINGS,
-                                    onClick = {
-                                        currentDestination = AdminDestination.SETTINGS
-                                        scope.launch { drawerState.close() }
-                                    }
-                                )
-
-                                SmmDrawerItem(
-                                    title = "Admin Profile",
-                                    icon = Icons.Filled.AccountCircle,
-                                    isSelected = currentDestination == AdminDestination.PROFILE,
-                                    onClick = {
-                                        currentDestination = AdminDestination.PROFILE
-                                        scope.launch { drawerState.close() }
-                                    }
-                                )
+                        AdminDrawerItem(
+                            title = "Bug Reports",
+                            icon = Icons.Filled.BugReport,
+                            isSelected = currentDestination == AdminDestination.BUG_REPORTS,
+                            onClick = {
+                                currentDestination = AdminDestination.BUG_REPORTS
+                                scope.launch { drawerState.close() }
                             }
-                        }
+                        )
+
+                        AdminDrawerItem(
+                            title = "Game Settings",
+                            icon = Icons.Filled.Tune,
+                            isSelected = currentDestination == AdminDestination.SETTINGS,
+                            onClick = {
+                                currentDestination = AdminDestination.SETTINGS
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+
+                        AdminDrawerItem(
+                            title = "Admin Profile",
+                            icon = Icons.Filled.AccountCircle,
+                            isSelected = currentDestination == AdminDestination.PROFILE,
+                            onClick = {
+                                currentDestination = AdminDestination.PROFILE
+                                scope.launch { drawerState.close() }
+                            }
+                        )
                     }
 
                     // Bottom: Clean app version indicator (Logout removed from sidebar)
@@ -753,7 +687,7 @@ fun MainAppScreen(
 }
 
 @Composable
-private fun SmmDrawerItem(
+private fun AdminDrawerItem(
     title: String,
     icon: ImageVector,
     isSelected: Boolean,
@@ -762,8 +696,8 @@ private fun SmmDrawerItem(
     Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent
+        shape = RoundedCornerShape(12.dp),
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f) else Color.Transparent
     ) {
         Row(
             modifier = Modifier
@@ -774,7 +708,7 @@ private fun SmmDrawerItem(
             Icon(
                 imageVector = icon,
                 contentDescription = title,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(14.dp))
@@ -782,7 +716,7 @@ private fun SmmDrawerItem(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
                 )
             )
         }
