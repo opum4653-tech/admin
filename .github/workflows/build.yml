@@ -47,17 +47,17 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.0
-          name: "NINMODS Admin v1.1.0 (Standard M3 FAB Overhaul, Full-Width Search & Unbreakable Admin Auth)"
+          tag_name: v1.1.1
+          name: "NINMODS Admin v1.1.1 (Complete Backend Error Masking, Friendly Alerts & Production Shield)"
           body: |
-            ### NINMODS Admin Android Console v1.1.0
-            Standard Material 3 FAB Overhaul, Full-Width Search & Fail-Safe Admin Auth:
+            ### NINMODS Admin Android Console v1.1.1
+            Complete Backend Error Masking, Human-Friendly Alerts & Fail-Safe Network Engine:
 
-            #### Key Updates in v1.1.0:
-            - **Standard Material 3 Floating Action Buttons (FAB)**: Moved "Add User", "Generate Keys", and "Add Manual Deposit" from the top search row down to standard bottom-right Floating Action Buttons, matching the Support screen style perfectly.
-            - **Spacious Full-Width Search & Filter Layouts**: Eliminated search bar squeezing and layout clipping on Users, Keys, and Deposits screens.
-            - **Unbreakable Admin Auth Routing**: Resolved "Admin authentication key required" error by injecting authentication tokens via HTTP Headers, URL Query parameters, and JSON payloads simultaneously, ensuring resilience against reverse proxy header-stripping.
-            - **Unified Database & Backend Parity**: Full synchronization with all 16 business-class tables in `database.sql`.
+            #### Key Updates in v1.1.1:
+            - **Complete Backend Masking & Stealth Error Handling**: Raw Java/JSON/HTML exceptions (such as `Value <!DOCTYPE ... cannot be converted to JSONObject`) are 100% intercepted and replaced with clean, professional, human-friendly alerts. Backend paths, server headers, and software internals are completely invisible to end-users.
+            - **Fail-Safe Response Reader**: `readResponse` now guarantees valid JSON structures regardless of server HTTP codes (503, 502, 500, 404), ensuring zero parser crashes.
+            - **Standard Material 3 Floating Action Buttons (FAB)**: Full-width search bars and clean bottom-right FABs on Users, Keys, and Deposits screens.
+            - **Triple-Layer Admin Authentication**: Automatic injection of authentication tokens across HTTP headers, query parameters, and JSON payloads.
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/*.apk

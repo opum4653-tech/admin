@@ -51,8 +51,48 @@ object AdminApiClient {
     }
 
     private fun readResponse(conn: HttpURLConnection): String {
-        val stream = if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream ?: conn.inputStream
-        return BufferedReader(InputStreamReader(stream, "UTF-8")).use { it.readText() }
+        val code = try { conn.responseCode } catch (e: Exception) { -1 }
+        val stream = try {
+            if (code in 200..299) conn.inputStream else conn.errorStream ?: conn.inputStream
+        } catch (e: Exception) {
+            null
+        }
+
+        if (stream == null) {
+            return JSONObject().apply {
+                put("success", false)
+                put("error", "Unable to connect to server. Please try again.")
+            }.toString()
+        }
+
+        val rawText = try {
+            BufferedReader(InputStreamReader(stream, "UTF-8")).use { it.readText() }
+        } catch (e: Exception) {
+            ""
+        }
+
+        val trimmed = rawText.trim()
+        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+            return trimmed
+        }
+
+        // Response is NOT a JSON object (e.g. HTML error page, 503, 502, 500, 404, etc.)
+        val userFriendlyMessage = when (code) {
+            503 -> "Server is temporarily unavailable. Please try again shortly."
+            502 -> "Bad gateway. The server is restarting, please try again."
+            500 -> "Internal server error. Please try again shortly."
+            404 -> "Service endpoint not found."
+            403 -> "Access denied. Insufficient permissions."
+            401 -> "Authentication required or session expired."
+            in 200..299 -> "Unexpected server response."
+            else -> "Unable to communicate with server. Please try again."
+        }
+
+        return JSONObject().apply {
+            put("success", false)
+            put("error", userFriendlyMessage)
+            put("http_code", code)
+        }.toString()
     }
 
     suspend fun login(username: String, password: String): Result<AdminProfile> = withContext(Dispatchers.IO) {

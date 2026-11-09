@@ -67,6 +67,25 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
         _currentTab.value = tab
     }
 
+    fun sanitizeError(e: Throwable?, fallback: String = "Operation failed"): String {
+        val msg = e?.message ?: return fallback
+        if (msg.contains("<!DOCTYPE", ignoreCase = true) ||
+            msg.contains("cannot be converted to JSONObject", ignoreCase = true) ||
+            msg.contains("<html>", ignoreCase = true) ||
+            msg.contains("html", ignoreCase = true) ||
+            msg.contains("JSONException", ignoreCase = true)) {
+            return "Server is temporarily unavailable. Please try again shortly."
+        }
+        if (msg.contains("failed to connect", ignoreCase = true) ||
+            msg.contains("connect timed out", ignoreCase = true) ||
+            msg.contains("Unable to resolve host", ignoreCase = true) ||
+            msg.contains("Network is unreachable", ignoreCase = true) ||
+            msg.contains("SocketTimeout", ignoreCase = true)) {
+            return "Unable to reach server. Please check your internet connection."
+        }
+        return msg
+    }
+
     fun login(username: String, pass: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -83,7 +102,7 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                 _isLoggedIn.value = true
                 refreshAll()
             } else {
-                _errorMessage.value = res.exceptionOrNull()?.message ?: "Login failed"
+                _errorMessage.value = sanitizeError(res.exceptionOrNull(), "Login failed")
             }
             _isLoading.value = false
         }
@@ -273,7 +292,7 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                 if (dashRes.isSuccess) _dashboardStats.value = dashRes.getOrNull()
                 onResult?.invoke(true, r.getOrNull() ?: "Generated successfully")
             } else {
-                onResult?.invoke(false, r.exceptionOrNull()?.message ?: "Generation failed")
+                onResult?.invoke(false, sanitizeError(r.exceptionOrNull(), "Generation failed"))
             }
             _isLoading.value = false
         }
@@ -298,7 +317,7 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                 if (dashRes.isSuccess) _dashboardStats.value = dashRes.getOrNull()
                 onResult(true, r.getOrNull() ?: "User created successfully")
             } else {
-                onResult(false, r.exceptionOrNull()?.message ?: "Failed to create user")
+                onResult(false, sanitizeError(r.exceptionOrNull(), "Failed to create user"))
             }
             _isLoading.value = false
         }
@@ -404,7 +423,7 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
             if (r.isSuccess) {
                 onResult(true, r.getOrNull() ?: "Broadcast sent")
             } else {
-                onResult(false, r.exceptionOrNull()?.message ?: "Failed to send")
+                onResult(false, sanitizeError(r.exceptionOrNull(), "Failed to send"))
             }
             _isLoading.value = false
         }
@@ -426,7 +445,7 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                 if (ticketsRes.isSuccess) _ticketsList.value = ticketsRes.getOrNull() ?: emptyList()
                 onResult(true, r.getOrNull() ?: "Ticket created")
             } else {
-                onResult(false, r.exceptionOrNull()?.message ?: "Failed to create ticket")
+                onResult(false, sanitizeError(r.exceptionOrNull(), "Failed to create ticket"))
             }
             _isLoading.value = false
         }
@@ -444,7 +463,7 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                 if (dashRes.isSuccess) _dashboardStats.value = dashRes.getOrNull()
                 onComplete?.invoke(true, r.getOrNull() ?: "Status updated")
             } else {
-                onComplete?.invoke(false, r.exceptionOrNull()?.message ?: "Failed to update status")
+                onComplete?.invoke(false, sanitizeError(r.exceptionOrNull(), "Failed to update status"))
             }
             _isLoading.value = false
         }
