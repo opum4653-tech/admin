@@ -214,7 +214,7 @@ object AdminApiClient {
                             deviceModel = item.optString("device_model").takeIf { it.isNotBlank() && it != "null" },
                             maxDevices = item.optInt("max_devices", 1),
                             maxResets = item.optInt("max_resets", 5),
-                            resetCount = item.optInt("reset_count", 0),
+                            resetCount = if (item.has("resets_count")) item.optInt("resets_count") else item.optInt("reset_count", 0),
                             expiresAt = item.optString("expires_at").takeIf { it.isNotBlank() && it != "null" },
                             notes = item.optString("notes").takeIf { it.isNotBlank() && it != "null" },
                             createdAt = item.optString("created_at")
