@@ -42,7 +42,7 @@ fun AdminSupportScreen(
             val matchesSearch = if (searchQuery.isBlank()) true else {
                 item.subject.contains(searchQuery, ignoreCase = true) ||
                 item.username.contains(searchQuery, ignoreCase = true) ||
-                (item.email?.contains(searchQuery, ignoreCase = true) ?: false) ||
+                item.email.contains(searchQuery, ignoreCase = true) ||
                 item.id.toString() == searchQuery.trim()
             }
             matchesFilter && matchesSearch
