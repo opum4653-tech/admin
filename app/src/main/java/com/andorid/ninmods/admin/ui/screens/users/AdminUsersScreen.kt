@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -53,18 +54,9 @@ fun AdminUsersScreen(
     }
 
     ResponsiveContentBox(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Enterprise Search & Add User Row
-            if (onNavigateToAddUser != null) {
-                AdminSearchAndActionRow(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
-                    placeholder = "Search by username, email...",
-                    actionButtonText = "Add User",
-                    actionButtonIcon = Icons.Filled.PersonAdd,
-                    onActionClick = onNavigateToAddUser
-                )
-            } else {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Enterprise Full-Width Search Bar
                 AdminSearchBar(
                     query = searchQuery,
                     onQueryChange = { searchQuery = it },
@@ -73,40 +65,60 @@ fun AdminUsersScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                 )
+
+                // Role Filter Pills Row
+                AdminFilterChipRow(
+                    items = roleFilters,
+                    selectedItem = selectedRoleFilter,
+                    onSelect = { selectedRoleFilter = it }
+                )
+
+                // Users List
+                if (isLoading && users.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
+                } else if (filteredUsers.isEmpty()) {
+                    AdminEmptyState(
+                        title = "No Users Found",
+                        subtitle = "No user accounts match the selected role filter ($selectedRoleFilter) or search query.",
+                        icon = Icons.Filled.People,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(filteredUsers, key = { it.id }) { item ->
+                            UserCardItem(
+                                user = item,
+                                onClick = { onSelectUser?.invoke(item) },
+                                onActionClick = { actionSheetUser = item }
+                            )
+                        }
+                    }
+                }
             }
 
-            // Role Filter Pills Row
-            AdminFilterChipRow(
-                items = roleFilters,
-                selectedItem = selectedRoleFilter,
-                onSelect = { selectedRoleFilter = it }
-            )
-
-            // Users List
-            if (isLoading && users.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-            } else if (filteredUsers.isEmpty()) {
-                AdminEmptyState(
-                    title = "No Users Found",
-                    subtitle = "No user accounts match the selected role filter ($selectedRoleFilter) or search query.",
-                    icon = Icons.Filled.People,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 90.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+            // Material 3 Floating Action Button at Bottom-Right (Aligned with Support Screen style)
+            if (onNavigateToAddUser != null) {
+                FloatingActionButton(
+                    onClick = onNavigateToAddUser,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(24.dp),
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
                 ) {
-                    items(filteredUsers, key = { it.id }) { item ->
-                        UserCardItem(
-                            user = item,
-                            onClick = { onSelectUser?.invoke(item) },
-                            onActionClick = { actionSheetUser = item }
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Add User",
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }

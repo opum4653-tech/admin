@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -53,43 +54,44 @@ fun AdminKeysScreen(
     }
 
     ResponsiveContentBox(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Enterprise Search & Action Row
-            AdminSearchAndActionRow(
-                query = searchQuery,
-                onQueryChange = { searchQuery = it },
-                placeholder = "Search by Key, HWID, Model...",
-                actionButtonText = "Generate",
-                actionButtonIcon = Icons.Filled.Add,
-                onActionClick = onOpenBulkGenerate
-            )
-
-            // Horizontal Filter Pills Row
-            AdminFilterChipRow(
-                items = filterOptions,
-                selectedItem = selectedFilter,
-                onSelect = { selectedFilter = it }
-            )
-
-            // Keys Content
-            if (isLoading && keys.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-            } else if (filteredKeys.isEmpty()) {
-                AdminEmptyState(
-                    title = "No License Keys Found",
-                    subtitle = "No license keys match the selected status filter ($selectedFilter) or search query.",
-                    icon = Icons.Filled.VpnKey,
-                    modifier = Modifier.fillMaxSize()
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Full-Width Enterprise Search Bar (No squishing)
+                AdminSearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    placeholder = "Search by Key, HWID, Model...",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                 )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 90.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    items(filteredKeys, key = { it.id }) { item ->
+
+                // Horizontal Filter Pills Row
+                AdminFilterChipRow(
+                    items = filterOptions,
+                    selectedItem = selectedFilter,
+                    onSelect = { selectedFilter = it }
+                )
+
+                // Keys Content
+                if (isLoading && keys.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
+                } else if (filteredKeys.isEmpty()) {
+                    AdminEmptyState(
+                        title = "No License Keys Found",
+                        subtitle = "No license keys match the selected status filter ($selectedFilter) or search query.",
+                        icon = Icons.Filled.VpnKey,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(filteredKeys, key = { it.id }) { item ->
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(18.dp),
@@ -180,7 +182,26 @@ fun AdminKeysScreen(
                 }
             }
         }
+
+        // Material 3 Floating Action Button at Bottom-Right
+        FloatingActionButton(
+            onClick = onOpenBulkGenerate,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(24.dp),
+            shape = CircleShape,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = "Generate Keys",
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
+}
 
     // Key Action Bottom Sheet (replaces center popup)
     actionDialogKey?.let { k ->

@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -49,56 +50,33 @@ fun AdminDepositsScreen(
     }
 
     ResponsiveContentBox(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Filter Row & Add Manual Deposit Action
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    AdminFilterChipRow(
-                        items = filterOptions,
-                        selectedItem = selectedFilter,
-                        onSelect = { selectedFilter = it },
-                        modifier = Modifier.padding(0.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Button(
-                    onClick = { showManualDepositDialog = true },
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
-                ) {
-                    Icon(imageVector = Icons.Filled.Add, contentDescription = "Add Deposit", modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Manual", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                }
-            }
-
-            // Transactions List
-            if (isLoading && deposits.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-            } else if (filteredDeposits.isEmpty()) {
-                AdminEmptyState(
-                    title = "No Deposits in Queue",
-                    subtitle = "No transactions found matching the selected filter ($selectedFilter).",
-                    icon = Icons.Filled.CheckCircle,
-                    modifier = Modifier.fillMaxSize()
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Enterprise Full-Width Filter Row
+                AdminFilterChipRow(
+                    items = filterOptions,
+                    selectedItem = selectedFilter,
+                    onSelect = { selectedFilter = it }
                 )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 90.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
+
+                // Transactions List
+                if (isLoading && deposits.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
+                } else if (filteredDeposits.isEmpty()) {
+                    AdminEmptyState(
+                        title = "No Deposits in Queue",
+                        subtitle = "No transactions found matching the selected filter ($selectedFilter).",
+                        icon = Icons.Filled.CheckCircle,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 96.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                     items(filteredDeposits, key = { it.id }) { item ->
                         val isPending = item.status.equals("pending", ignoreCase = true)
 
@@ -247,7 +225,26 @@ fun AdminDepositsScreen(
                 }
             }
         }
+
+        // Material 3 Floating Action Button at Bottom-Right (Aligned with Support Screen style)
+        FloatingActionButton(
+            onClick = { showManualDepositDialog = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(24.dp),
+            shape = CircleShape,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = "Add Manual Deposit",
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
+}
 
     // Manual Deposit Addition Bottom Sheet (slides up from bottom)
     if (showManualDepositDialog) {

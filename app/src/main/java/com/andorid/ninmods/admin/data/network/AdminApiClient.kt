@@ -16,7 +16,12 @@ import java.net.URLEncoder
 object AdminApiClient {
 
     private fun openConnection(endpoint: String, method: String, apiKey: String? = null): HttpURLConnection {
-        val fullUrl = if (endpoint.startsWith("http")) endpoint else "${AdminConfig.BASE_URL}${AdminConfig.API_PREFIX}$endpoint"
+        var fullUrl = if (endpoint.startsWith("http")) endpoint else "${AdminConfig.BASE_URL}${AdminConfig.API_PREFIX}$endpoint"
+        if (!apiKey.isNullOrBlank()) {
+            val delimiter = if (fullUrl.contains("?")) "&" else "?"
+            val encodedKey = URLEncoder.encode(apiKey, "UTF-8")
+            fullUrl += "${delimiter}admin_key=$encodedKey&api_key=$encodedKey"
+        }
         val url = URL(fullUrl)
         val conn = url.openConnection() as HttpURLConnection
         conn.requestMethod = method
@@ -27,6 +32,9 @@ object AdminApiClient {
         if (!apiKey.isNullOrBlank()) {
             conn.setRequestProperty("Authorization", "Bearer $apiKey")
             conn.setRequestProperty("x-admin-key", apiKey)
+            conn.setRequestProperty("admin-key", apiKey)
+            conn.setRequestProperty("x-api-key", apiKey)
+            conn.setRequestProperty("api-key", apiKey)
         }
         if (method in listOf("POST", "PUT", "DELETE")) {
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
@@ -169,6 +177,8 @@ object AdminApiClient {
         try {
             val conn = openConnection("/keys/generate", "POST", apiKey)
             val payload = JSONObject().apply {
+                put("admin_key", apiKey)
+                put("api_key", apiKey)
                 put("quantity", quantity)
                 put("duration_hours", durationHours)
                 put("duration_type", durationType)
