@@ -47,22 +47,23 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-            tag_name: v1.1.5
-            name: "NinMods Admin v1.1.5 (Push Alerts Card List with Floating FAB & Real-Time Sync)"
+            tag_name: v1.1.6
+            name: "NinMods Admin v1.1.6 (Real Dashboard Report Graphs & Searchable User Dropdowns)"
             body: |
-              ### NinMods Admin Android Console v1.1.5
-              Push Alerts Cards & Floating Plus Component + Real-Time Support Polling:
+              ### NinMods Admin Android Console v1.1.6
+              Real Dashboard Report Graphs & Searchable User Dropdowns:
 
-              #### Key Updates in v1.1.5:
-              - **Push Alerts Page Overhaul**:
-                - Full card list view for active and past broadcast alerts.
-                - Severity badges (`URGENT`, `WARNING`, `UPDATE`, `INFO`) and format pill (`MODAL POPUP` / `BANNER`).
-                - Delete alert button with instant revocation confirmation dialog.
-                - Floating Action Button (+) positioned at bottom-right for composing new alerts via `CreateBroadcastBottomSheet`.
-              - **Real-Time Live Polling**:
-                - Automatic 4-second sync for tickets and messages without manual refresh.
-                - Immediate live updates when users submit or reply to tickets.
-              - **Resilient API Envelope Parsing**:
+              #### Key Updates in v1.1.6:
+              - **Real Dashboard Visual Report Graphs**:
+                - Interactive Key Inventory Health distribution chart (Active, Unused, Expired, Banned) with real proportional segments and live percentage chips.
+                - Financial & Settlement Ledger telemetry card comparing circulating wallet funds with pending deposit backlog.
+                - User Ecosystem Distribution card showing real-time proportions of standard users, resellers, and VIP accounts.
+              - **Searchable User Dropdown System**:
+                - Manual Deposit bottom sheet now features searchable user dropdown selector with username/email/ID filtering, live wallet balance, and 1-tap selection (zero manual ID typing).
+                - Push Alert bottom sheet user targeting now features full searchable user selector when targeting individual clients.
+              - **Drawer & UI Consistency**:
+                - Clean header card without redundant balance pill or corner ribbons.
+                - Default destination set to Dashboard immediately upon login.
                 - Supports both wrapped and unwrapped JSON structures.
             draft: false
             prerelease: false

@@ -6,8 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
@@ -27,6 +29,7 @@ import com.andorid.ninmods.admin.ui.components.ApatchOrange
 import com.andorid.ninmods.admin.ui.components.ApatchRed
 import com.andorid.ninmods.admin.ui.components.LoadingButton
 import com.andorid.ninmods.admin.ui.components.ResponsiveContentBox
+import com.andorid.ninmods.admin.ui.components.StatusBadgePill
 import com.andorid.ninmods.admin.ui.dialogs.AdminCustomBottomSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -404,15 +407,34 @@ private fun CreateBroadcastBottomSheet(
     var isPopup by remember { mutableStateOf(true) }
     var imageUrl by remember { mutableStateOf("") }
     var targetAllUsers by remember { mutableStateOf(true) }
-    var targetUserIdText by remember { mutableStateOf("") }
+    var selectedUser by remember { mutableStateOf<AdminUserItem?>(null) }
+    var userSearchQuery by remember { mutableStateOf("") }
     var isSending by remember { mutableStateOf(false) }
+
+    val filteredUsers = remember(users, userSearchQuery) {
+        if (userSearchQuery.isBlank()) {
+            users.take(8)
+        } else {
+            val q = userSearchQuery.trim().lowercase()
+            users.filter {
+                it.username.lowercase().contains(q) ||
+                it.email.lowercase().contains(q) ||
+                it.id.toString() == q
+            }.take(10)
+        }
+    }
 
     AdminCustomBottomSheet(
         title = "Create Push Alert",
         subtitle = "Dispatch live popup or banner announcement to users",
         onDismissRequest = { if (!isSending) onDismiss() }
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
             // Title
             OutlinedTextField(
                 value = title,
@@ -509,17 +531,191 @@ private fun CreateBroadcastBottomSheet(
                 }
             }
 
+            // Searchable User Selector (When specific user is targeted)
             if (!targetAllUsers) {
-                OutlinedTextField(
-                    value = targetUserIdText,
-                    onValueChange = { targetUserIdText = it.filter { ch -> ch.isDigit() } },
-                    label = { Text("Target User ID (#)") },
-                    placeholder = { Text("e.g. 42") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isSending
+                Text(
+                    text = "Select Target User",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+
+                if (selectedUser != null) {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = selectedUser!!.username.take(1).uppercase(),
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = selectedUser!!.username,
+                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    StatusBadgePill(text = selectedUser!!.role, status = selectedUser!!.role)
+                                }
+                                Text(
+                                    text = "${selectedUser!!.email} • ID #${selectedUser!!.id}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            IconButton(
+                                onClick = { selectedUser = null },
+                                enabled = !isSending
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = "Change User",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    OutlinedTextField(
+                        value = userSearchQuery,
+                        onValueChange = { userSearchQuery = it },
+                        label = { Text("Search Target User by Name, Email, or ID") },
+                        placeholder = { Text("Type username or email...") },
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
+                        },
+                        trailingIcon = {
+                            if (userSearchQuery.isNotEmpty()) {
+                                IconButton(onClick = { userSearchQuery = "" }) {
+                                    Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear")
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isSending
+                    )
+
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 180.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            if (filteredUsers.isEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = if (users.isEmpty()) "No users loaded" else "No users matching query",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            } else {
+                                filteredUsers.forEach { u ->
+                                    Surface(
+                                        onClick = {
+                                            selectedUser = u
+                                            userSearchQuery = ""
+                                        },
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surface,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .background(MaterialTheme.colorScheme.secondaryContainer, shape = CircleShape),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = u.username.take(1).uppercase(),
+                                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.width(10.dp))
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Text(
+                                                        text = u.username,
+                                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                                        color = MaterialTheme.colorScheme.onSurface,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = "(#${u.id})",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.primary
+                                                    )
+                                                }
+                                                Text(
+                                                    text = "${u.email} • Role: ${u.role}",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             // Image URL (Optional)
@@ -540,10 +736,10 @@ private fun CreateBroadcastBottomSheet(
             LoadingButton(
                 text = "DISPATCH BROADCAST ALERT",
                 isLoading = isSending,
-                enabled = title.isNotBlank() && message.isNotBlank() && !isSending,
+                enabled = title.isNotBlank() && message.isNotBlank() && !isSending && (targetAllUsers || selectedUser != null),
                 onClick = {
                     isSending = true
-                    val targetUid = if (targetAllUsers) null else targetUserIdText.toIntOrNull()
+                    val targetUid = if (targetAllUsers) null else selectedUser?.id
                     onSend(title.trim(), message.trim(), selectedType, imageUrl.trim().takeIf { it.isNotBlank() }, isPopup, targetUid)
                 },
                 modifier = Modifier.fillMaxWidth()

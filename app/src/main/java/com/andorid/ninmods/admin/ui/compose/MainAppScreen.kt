@@ -581,6 +581,7 @@ fun MainAppScreen(
 
                         AdminDestination.DEPOSITS -> AdminDepositsScreen(
                             deposits = allDeposits,
+                            users = usersList,
                             isLoading = isLoading,
                             onRefresh = { viewModel.refreshAll() },
                             onApprove = { depositId, amount ->

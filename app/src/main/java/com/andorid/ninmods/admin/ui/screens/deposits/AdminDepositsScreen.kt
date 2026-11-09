@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.andorid.ninmods.admin.data.model.AdminUserItem
 import com.andorid.ninmods.admin.data.model.PendingDepositItem
 import com.andorid.ninmods.admin.ui.components.*
 import com.andorid.ninmods.admin.ui.dialogs.ApproveDepositBottomSheet
@@ -28,6 +29,7 @@ import com.andorid.ninmods.admin.ui.dialogs.RejectDepositBottomSheet
 @Composable
 fun AdminDepositsScreen(
     deposits: List<PendingDepositItem>,
+    users: List<AdminUserItem> = emptyList(),
     isLoading: Boolean,
     onRefresh: () -> Unit,
     onApprove: (depositId: Int, amount: Double?) -> Unit,
@@ -249,6 +251,7 @@ fun AdminDepositsScreen(
     // Manual Deposit Addition Bottom Sheet (slides up from bottom)
     if (showManualDepositDialog) {
         ManualDepositBottomSheet(
+            users = users,
             onDismiss = { showManualDepositDialog = false },
             onConfirm = { uid, amt, mth, not ->
                 onAddManualDeposit(uid, amt, mth, not)
