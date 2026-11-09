@@ -166,9 +166,9 @@ fun MainAppScreen(
                         .fillMaxSize()
                         .padding(horizontal = 16.dp, vertical = 20.dp)
                 ) {
-                    // SMMTor Brand Title
+                    // Brand Title
                     Text(
-                        text = "SMMTor",
+                        text = "NinMods",
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.ExtraBold,
                             color = Color(0xFF007AFF)
@@ -472,7 +472,7 @@ fun MainAppScreen(
                     // Bottom: Clean app version indicator (Logout removed from sidebar)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "SMMTor Admin v1.1.2",
+                        text = "NinMods Admin v1.1.2",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         modifier = Modifier.align(Alignment.CenterHorizontally)

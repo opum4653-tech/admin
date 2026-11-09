@@ -48,14 +48,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.1.2
-          name: "SMMTor / NINMODS Admin v1.1.2 (SMMTor UI Overhaul, Database Parity & Stealth Engine)"
+          name: "NinMods Admin v1.1.2 (Modern Sidebar Profile Card, Database Parity & Stealth Engine)"
           body: |
-            ### SMMTor / NINMODS Admin Android Console v1.1.2
-            SMMTor Website Theme Overhaul, Direct Database Integration, Backend Masking & Stealth Engine:
+            ### NinMods Admin Android Console v1.1.2
+            Modern UI Profile Card Overhaul, Direct Database Integration, Backend Masking & Stealth Engine:
 
             #### Key Updates in v1.1.2:
-            - **SMMTor Sidebar Profile Card & Menu Overhaul**:
-              - Top brand header "SMMTor" in vibrant brand blue (`#007AFF`).
+            - **Modern Sidebar Profile Card & Menu Overhaul**:
+              - Top brand header "NinMods" in vibrant brand blue (`#007AFF`).
               - Modern rounded card with diagonal purple-magenta ribbon badge (`ADMIN`).
               - Circular avatar with pastel green background.
               - Bold administrator username display.
