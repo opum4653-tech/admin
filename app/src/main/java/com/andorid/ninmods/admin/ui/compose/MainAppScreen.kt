@@ -182,30 +182,10 @@ fun MainAppScreen(
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                             .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), RoundedCornerShape(22.dp))
                     ) {
-                        // Diagonal Ribbon Badge in Top-Right
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .offset(x = 22.dp, y = 10.dp)
-                                .rotate(45f)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .padding(horizontal = 26.dp, vertical = 3.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = adminRole.uppercase(),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontSize = 10.sp
-                                )
-                            )
-                        }
-
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 20.dp),
+                                .padding(horizontal = 16.dp, vertical = 22.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             // Circular Avatar with NinMods primaryContainer
@@ -222,7 +202,7 @@ fun MainAppScreen(
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             Text(
                                 text = adminUsername,
@@ -233,34 +213,6 @@ fun MainAppScreen(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
-
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            // Balance Pill in NinMods PrimaryContainer
-                            val balanceStr = dashboardStats?.let {
-                                String.format(java.util.Locale.US, "%.2f", it.totalUserBalance)
-                            } ?: "0.00"
-
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier.fillMaxWidth(0.85f)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "$$balanceStr",
-                                        style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.ExtraBold,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    )
-                                }
-                            }
                         }
                     }
 
