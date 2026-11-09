@@ -333,7 +333,7 @@ fun MainAppScreen(
                         // Orders (License Keys)
                         SmmDrawerItem(
                             title = "Orders",
-                            icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                            icon = Icons.Filled.Receipt,
                             isSelected = currentDestination == AdminDestination.KEYS,
                             onClick = {
                                 currentDestination = AdminDestination.KEYS
