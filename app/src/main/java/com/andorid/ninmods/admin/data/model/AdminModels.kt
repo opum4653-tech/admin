@@ -149,3 +149,16 @@ data class AdminBugItem(
     val adminNotes: String?,
     val createdAt: String
 )
+
+data class AdminBroadcastItem(
+    val id: Int,
+    val brandId: Int = 1,
+    val title: String,
+    val message: String,
+    val type: String = "info",
+    val imageUrl: String? = null,
+    val isPopup: Boolean = true,
+    val targetUserId: Int? = null,
+    val status: String = "active",
+    val createdAt: String? = null
+)

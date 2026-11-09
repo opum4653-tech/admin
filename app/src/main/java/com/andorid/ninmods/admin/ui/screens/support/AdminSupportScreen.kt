@@ -19,6 +19,8 @@ import com.andorid.ninmods.admin.data.model.AdminTicketItem
 import com.andorid.ninmods.admin.data.model.AdminUserItem
 import com.andorid.ninmods.admin.ui.components.*
 import com.andorid.ninmods.admin.ui.dialogs.NewTicketBottomSheet
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 @Composable
 fun AdminSupportScreen(
@@ -33,6 +35,13 @@ fun AdminSupportScreen(
     var selectedFilter by remember { mutableStateOf("ALL") }
     var searchQuery by remember { mutableStateOf("") }
     var showNewTicketSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        while (isActive) {
+            delay(4000L) // Real-time poll tickets every 4 seconds
+            onRefresh()
+        }
+    }
 
     val filterOptions = listOf("ALL", "OPEN", "ANSWERED", "CLOSED")
 

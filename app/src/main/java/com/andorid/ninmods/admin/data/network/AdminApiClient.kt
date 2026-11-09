@@ -838,6 +838,56 @@ object AdminApiClient {
         }
     }
 
+    suspend fun getBroadcasts(apiKey: String): Result<List<AdminBroadcastItem>> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/broadcasts", "GET", apiKey)
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode == 200 && json.optBoolean("success", true)) {
+                val target = json.optJSONObject("data") ?: json
+                val arr = target.optJSONArray("broadcasts") ?: json.optJSONArray("broadcasts") ?: JSONArray()
+                val list = mutableListOf<AdminBroadcastItem>()
+                for (i in 0 until arr.length()) {
+                    val item = arr.getJSONObject(i)
+                    list.add(
+                        AdminBroadcastItem(
+                            id = item.optInt("id"),
+                            brandId = item.optInt("brand_id", 1),
+                            title = item.optString("title"),
+                            message = item.optString("message"),
+                            type = item.optString("type", "info"),
+                            imageUrl = item.optString("image_url").takeIf { it.isNotBlank() && it != "null" },
+                            isPopup = item.optInt("is_popup", 1) == 1 || item.optBoolean("is_popup", true),
+                            targetUserId = if (item.isNull("target_user_id")) null else item.optInt("target_user_id").takeIf { it > 0 },
+                            status = item.optString("status", "active"),
+                            createdAt = item.optString("created_at").takeIf { it.isNotBlank() && it != "null" }
+                        )
+                    )
+                }
+                Result.success(list)
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to fetch broadcasts")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteBroadcast(apiKey: String, broadcastId: Int): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val conn = openConnection("/broadcasts/$broadcastId", "DELETE", apiKey)
+            val resText = readResponse(conn)
+            val json = JSONObject(resText)
+            if (conn.responseCode in 200..299 && json.optBoolean("success", true)) {
+                Result.success(true)
+            } else {
+                Result.failure(Exception(json.optString("error", "Failed to delete broadcast")))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun createAdminTicket(
         apiKey: String,
         targetUserId: Int,

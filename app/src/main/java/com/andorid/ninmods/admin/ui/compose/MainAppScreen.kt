@@ -106,6 +106,7 @@ fun MainAppScreen(
     val gameConfigs by viewModel.gameConfigs.collectAsState()
     val plans by viewModel.plans.collectAsState()
     val bugsList by viewModel.bugsList.collectAsState()
+    val broadcastsList by viewModel.broadcastsList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     val adminUsername = viewModel.sessionManager.username ?: "Admin"
@@ -600,7 +601,11 @@ fun MainAppScreen(
                         )
 
                         AdminDestination.BROADCAST -> AdminBroadcastScreen(
+                            broadcasts = broadcastsList,
                             users = usersList,
+                            isLoading = isLoading,
+                            onRefresh = { viewModel.fetchBroadcasts() },
+                            onDeleteBroadcast = { id -> viewModel.deleteBroadcast(id) },
                             onSendNotification = { title, message, type, imageUrl, isPopup, targetUserId, onComplete ->
                                 viewModel.sendBroadcastNotification(title, message, type, imageUrl, isPopup, targetUserId) { success, msg ->
                                     onComplete(success, msg)

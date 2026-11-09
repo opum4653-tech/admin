@@ -57,6 +57,9 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
     private val _bugsList = MutableStateFlow<List<AdminBugItem>>(emptyList())
     val bugsList: StateFlow<List<AdminBugItem>> = _bugsList.asStateFlow()
 
+    private val _broadcastsList = MutableStateFlow<List<AdminBroadcastItem>>(emptyList())
+    val broadcastsList: StateFlow<List<AdminBroadcastItem>> = _broadcastsList.asStateFlow()
+
     init {
         if (_isLoggedIn.value) {
             refreshAll()
@@ -119,6 +122,7 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
         _ticketsList.value = emptyList()
         _gameConfigs.value = emptyList()
         _plans.value = emptyList()
+        _broadcastsList.value = emptyList()
     }
 
     fun refreshAll() {
@@ -180,6 +184,12 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                         val r = AdminApiClient.getBugReports(key)
                         if (r.isSuccess) {
                             _bugsList.value = r.getOrNull() ?: emptyList()
+                        }
+                    }
+                    launch {
+                        val r = AdminApiClient.getBroadcasts(key)
+                        if (r.isSuccess) {
+                            _broadcastsList.value = r.getOrNull() ?: emptyList()
                         }
                     }
                 }
@@ -421,11 +431,37 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
             _isLoading.value = true
             val r = AdminApiClient.sendBroadcastNotification(key, title, message, type, imageUrl, isPopup, targetUserId)
             if (r.isSuccess) {
+                fetchBroadcasts()
                 onResult(true, r.getOrNull() ?: "Broadcast sent")
             } else {
                 onResult(false, sanitizeError(r.exceptionOrNull(), "Failed to send"))
             }
             _isLoading.value = false
+        }
+    }
+
+    fun fetchBroadcasts() {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            val r = AdminApiClient.getBroadcasts(key)
+            if (r.isSuccess) {
+                _broadcastsList.value = r.getOrNull() ?: emptyList()
+            }
+        }
+    }
+
+    fun deleteBroadcast(broadcastId: Int, onResult: (Boolean, String) -> Unit = { _, _ -> }) {
+        val key = sessionManager.apiKey ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            val r = AdminApiClient.deleteBroadcast(key, broadcastId)
+            _isLoading.value = false
+            if (r.isSuccess) {
+                fetchBroadcasts()
+                onResult(true, "Alert deleted successfully")
+            } else {
+                onResult(false, sanitizeError(r.exceptionOrNull(), "Failed to delete alert"))
+            }
         }
     }
 

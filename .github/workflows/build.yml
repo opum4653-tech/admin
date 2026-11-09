@@ -47,22 +47,23 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-            tag_name: v1.1.4
-            name: "NinMods Admin v1.1.4 (Searchable User Dropdown for Direct Messages & Clean Console)"
+            tag_name: v1.1.5
+            name: "NinMods Admin v1.1.5 (Push Alerts Card List with Floating FAB & Real-Time Sync)"
             body: |
-              ### NinMods Admin Android Console v1.1.4
-              Searchable User Dropdown for Direct Messages & Support:
+              ### NinMods Admin Android Console v1.1.5
+              Push Alerts Cards & Floating Plus Component + Real-Time Support Polling:
 
-              #### Key Updates in v1.1.4:
-              - **Searchable User Selector Dropdown for Direct Messages**:
-                - No manual ID entry required; instant live search across username, email, and ID.
-                - Dropdown card display with initial avatar, username, email, and role badge.
-                - One-tap selection and clear/change action.
-              - **Support & Messages Hub**:
-                - Search bar for quick filtering by ticket ID, user, or topic.
-                - Direct conversation thread with full user chat view.
-              - **Clean Profile Card**:
-                - SuperAdmin tag ribbon and balance pill removed from drawer.
+              #### Key Updates in v1.1.5:
+              - **Push Alerts Page Overhaul**:
+                - Full card list view for active and past broadcast alerts.
+                - Severity badges (`URGENT`, `WARNING`, `UPDATE`, `INFO`) and format pill (`MODAL POPUP` / `BANNER`).
+                - Delete alert button with instant revocation confirmation dialog.
+                - Floating Action Button (+) positioned at bottom-right for composing new alerts via `CreateBroadcastBottomSheet`.
+              - **Real-Time Live Polling**:
+                - Automatic 4-second sync for tickets and messages without manual refresh.
+                - Immediate live updates when users submit or reply to tickets.
+              - **Resilient API Envelope Parsing**:
+                - Supports both wrapped and unwrapped JSON structures.
             draft: false
             prerelease: false
             files: app/build/outputs/apk/release/*.apk
