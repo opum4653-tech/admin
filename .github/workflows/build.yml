@@ -47,21 +47,22 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-            tag_name: v1.1.3
-            name: "NinMods Admin v1.1.3 (Clean Profile Card, No Balance Pill, No Tag)"
+            tag_name: v1.1.4
+            name: "NinMods Admin v1.1.4 (Searchable User Dropdown for Direct Messages & Clean Console)"
             body: |
-              ### NinMods Admin Android Console v1.1.3
-              Clean Sidebar Profile Card & Native Admin Console:
+              ### NinMods Admin Android Console v1.1.4
+              Searchable User Dropdown for Direct Messages & Support:
 
-              #### Key Updates in v1.1.3:
-              - **Clean Profile Card Layout**:
-                - Removed diagonal ribbon tag (`SUPERADMIN` / `ADMIN`) from profile card.
-                - Removed balance pill (`$0.00`) from sidebar (Admin manages system without personal balance).
-                - Retained clean circular NinMods avatar and bold username.
-              - **Floating Action Button (+)**:
-                - Active across License Keys, Users & Resellers, Deposits, and Support Tickets.
-              - **Backend Stability**:
-                - Syntax and route synchronization verified.
+              #### Key Updates in v1.1.4:
+              - **Searchable User Selector Dropdown for Direct Messages**:
+                - No manual ID entry required; instant live search across username, email, and ID.
+                - Dropdown card display with initial avatar, username, email, and role badge.
+                - One-tap selection and clear/change action.
+              - **Support & Messages Hub**:
+                - Search bar for quick filtering by ticket ID, user, or topic.
+                - Direct conversation thread with full user chat view.
+              - **Clean Profile Card**:
+                - SuperAdmin tag ribbon and balance pill removed from drawer.
             draft: false
             prerelease: false
             files: app/build/outputs/apk/release/*.apk

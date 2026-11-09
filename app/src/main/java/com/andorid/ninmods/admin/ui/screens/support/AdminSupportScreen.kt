@@ -16,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.andorid.ninmods.admin.data.model.AdminTicketItem
+import com.andorid.ninmods.admin.data.model.AdminUserItem
 import com.andorid.ninmods.admin.ui.components.*
 import com.andorid.ninmods.admin.ui.dialogs.NewTicketBottomSheet
 
 @Composable
 fun AdminSupportScreen(
     tickets: List<AdminTicketItem>,
+    users: List<AdminUserItem> = emptyList(),
     isLoading: Boolean,
     onRefresh: () -> Unit,
     onSelectTicket: (AdminTicketItem) -> Unit,
@@ -29,19 +31,37 @@ fun AdminSupportScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedFilter by remember { mutableStateOf("ALL") }
+    var searchQuery by remember { mutableStateOf("") }
     var showNewTicketSheet by remember { mutableStateOf(false) }
 
     val filterOptions = listOf("ALL", "OPEN", "ANSWERED", "CLOSED")
 
-    val filteredTickets = remember(tickets, selectedFilter) {
-        tickets.filter {
-            if (selectedFilter == "ALL") true else it.status.equals(selectedFilter, ignoreCase = true)
+    val filteredTickets = remember(tickets, selectedFilter, searchQuery) {
+        tickets.filter { item ->
+            val matchesFilter = if (selectedFilter == "ALL") true else item.status.equals(selectedFilter, ignoreCase = true)
+            val matchesSearch = if (searchQuery.isBlank()) true else {
+                item.subject.contains(searchQuery, ignoreCase = true) ||
+                item.username.contains(searchQuery, ignoreCase = true) ||
+                (item.email?.contains(searchQuery, ignoreCase = true) ?: false) ||
+                item.id.toString() == searchQuery.trim()
+            }
+            matchesFilter && matchesSearch
         }
     }
 
     ResponsiveContentBox(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
+                // Search Bar
+                AdminSearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    placeholder = "Search messages by User, Subject, or ID...",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                )
+
                 // Status Filter Tabs
                 AdminFilterChipRow(
                     items = filterOptions,
@@ -153,6 +173,7 @@ fun AdminSupportScreen(
 
     if (showNewTicketSheet) {
         NewTicketBottomSheet(
+            users = users,
             onDismiss = { showNewTicketSheet = false },
             onCreateTicket = { uid, subj, msg, prio ->
                 onCreateTicket(uid, subj, msg, prio)

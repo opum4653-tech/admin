@@ -74,7 +74,7 @@ enum class AdminDestination(
     GENERATE_KEY("Generate Keys", "Batch Generator & Bindings", Icons.Filled.Key, false),
     ADD_USER("Add User", "Create User Account", Icons.Filled.PersonAdd, false),
     USER_DETAIL("User Profile", "Account Inspector & Balances", Icons.Filled.Person, false),
-    SUPPORT("Support", "Live Tickets & Threads", Icons.Filled.SupportAgent),
+    SUPPORT("Support & Messages", "Direct Messages & User Tickets", Icons.Filled.SupportAgent),
     TICKET_CHAT("Ticket Thread", "Live Conversation", Icons.AutoMirrored.Filled.Chat, false),
     DEPOSITS("Deposits", "Review & Manual Credit", Icons.Filled.AccountBalanceWallet),
     UPLOAD("Mod Deploy", "Package Upload", Icons.Filled.CloudUpload),
@@ -295,7 +295,7 @@ fun MainAppScreen(
                         )
 
                         AdminDrawerItem(
-                            title = "Support Tickets",
+                            title = "Support & Messages",
                             icon = Icons.Filled.SupportAgent,
                             isSelected = currentDestination == AdminDestination.SUPPORT,
                             onClick = {
@@ -549,6 +549,7 @@ fun MainAppScreen(
 
                         AdminDestination.SUPPORT -> AdminSupportScreen(
                             tickets = ticketsList,
+                            users = usersList,
                             isLoading = isLoading,
                             onRefresh = { viewModel.refreshAll() },
                             onSelectTicket = { ticket ->
